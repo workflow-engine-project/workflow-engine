@@ -8,17 +8,17 @@
 <table>
   <tr>
     <td align="center" width="150px">
-      <a href="" target="_blank">
+      <a href="https://github.com/Ohhong" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/48611456?v=4" alt="오정재 프로필" />
       </a>
     </td>
     <td align="center" width="150px">
-      <a href="https://github.com/NewJiSoo" target="_blank">
+      <a href="https://github.com/hwan3526" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/41356191?v=4" alt="이지환 프로필" />
       </a>
     </td>
     <td align="center" width="150px">
-      <a href="https://github.com/ansoyun12" target="_blank">
+      <a href="https://github.com/giyong-choi" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/137133519?v=4" alt="최기용 프로필" />
       </a>
     </td>
@@ -30,22 +30,22 @@
   </tr>
   <tr>
     <td align="center">
-      <a href="" target="_blank">
+      <a href="https://github.com/Ohhong" target="_blank">
         오정재(멘토)
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/minsuhaha" target="_blank">
+      <a href="https://github.com/hwan3526" target="_blank">
         이지환
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/NewJiSoo" target="_blank">
+      <a href="https://github.com/giyong-choi" target="_blank">
         최기용
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/ansoyun12" target="_blank">
+      <a href="https://github.com/minsuhaha" target="_blank">
         하민수
       </a>
     </td>
