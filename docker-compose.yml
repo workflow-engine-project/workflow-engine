@@ -16,6 +16,7 @@ services:
       - redis
 
   db:
+    container_name: postgres
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -24,9 +25,10 @@ services:
       POSTGRES_USER: $POSTGRESQL_USER
       POSTGRES_PASSWORD: $POSTGRESQL_PWD
     ports:
-       - "5435:5432"
+       - "5432:5432"
 
-  redis:  
+  redis:
+    container_name: redis
     image: redis
     ports:
       - "6379:6379"
