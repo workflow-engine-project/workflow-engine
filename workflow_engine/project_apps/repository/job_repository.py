@@ -1,4 +1,4 @@
-from models import Job
+from project_apps.models import Job
 
 class JobRepository:
     def create_job(self, workflow_uuid, name, image, parameters, next_job_uuid, depends_count):

@@ -1,4 +1,4 @@
-from models import History
+from project_apps.models import History
 
 class HistoryRepository:
     def create_history(self, workflow_uuid, status, started_at, completed_at):
