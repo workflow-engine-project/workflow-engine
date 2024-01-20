@@ -1,4 +1,4 @@
-from models import Workflow
+from project_apps.models import Workflow
 
 class WorkflowRepository:
     def create_workflow(self, name, description):

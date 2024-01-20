@@ -2,7 +2,7 @@ FROM python:3.11
 
 WORKDIR /app/
 
-COPY ./api /app/
+COPY ./workflow_engine /app/
 
 COPY ./requirements.txt /app/
 
