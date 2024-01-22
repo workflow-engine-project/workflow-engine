@@ -8,5 +8,5 @@ class Job(models.Model):
     name = models.CharField(max_length=255)
     image = models.CharField(max_length=255)
     parameters = models.TextField()
-    next_job_uuid = models.UUIDField(blank=True, null=True)
+    next_job_uuids = models.TextField()
     depends_count = models.IntegerField()
