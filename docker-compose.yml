@@ -15,6 +15,19 @@ services:
       - db
       - redis
 
+  celery-worker:
+    container_name: celery_worker_container
+    build: .
+    command: celery -A workflow_engine worker -l info
+    volumes:
+      - ./workflow_engine:/app
+    environment:
+      CELERY_BROKER_URL: $CELERY_BROKER_URL
+      CELERY_RESULT_BACKEND: $CELERY_RESULT_BACKEND
+    depends_on:
+      - db
+      - redis
+
   db:
     container_name: postgres
     image: postgres
@@ -25,7 +38,7 @@ services:
       POSTGRES_USER: $POSTGRESQL_USER
       POSTGRES_PASSWORD: $POSTGRESQL_PWD
     ports:
-       - "5432:5432"
+      - "5432:5432"
 
   redis:
     container_name: redis
