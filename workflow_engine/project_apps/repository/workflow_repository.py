@@ -2,7 +2,8 @@ from project_apps.models import Workflow
 
 class WorkflowRepository:
     def create_workflow(self, name, description):
-        pass
+        workflow = Workflow.objects.create(name=name, description=description)
+        return workflow
 
     def get_workflow(self, workflow_uuid):
         pass
