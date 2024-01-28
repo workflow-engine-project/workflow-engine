@@ -6,7 +6,8 @@ class WorkflowRepository:
         return workflow
 
     def get_workflow(self, workflow_uuid):
-        pass
+        workflow = Workflow.objects.get(uuid=workflow_uuid)
+        return workflow
 
     def update_workflow(self, workflow_uuid, **kwargs):
         # TODO: 업데이트 필드 확정
@@ -14,4 +15,4 @@ class WorkflowRepository:
         pass
 
     def delete_workflow(self, workflow_uuid):
-        pass
+        Workflow.objects.get(uuid=workflow_uuid).delete()

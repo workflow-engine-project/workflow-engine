@@ -52,3 +52,14 @@ class WorkflowService:
         serialized_workflow = serialize_workflow(workflow_info, jobs_info)
 
         return serialized_workflow
+
+    def delete_workflow(self, workflow_uuid):
+        workflow = self.workflow_repository.get_workflow(workflow_uuid)
+        jobs = self.job_repository.get_job_list(workflow_uuid)
+
+        # Workflow 삭제
+        self.workflow_repository.delete_workflow(workflow.uuid)
+
+        # Jobs 삭제
+        for job in jobs:
+            self.job_repository.delete_job(job.uuid)
