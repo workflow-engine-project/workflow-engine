@@ -2,6 +2,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from project_apps.models import Job
 
+
 class JobRepository:
     def create_job(self, workflow_uuid, name, image, parameters, next_job_names, depends_count=0):
         job = Job.objects.create(
@@ -18,10 +19,15 @@ class JobRepository:
     def get_job(self, job_uuid):
         pass
 
-    def update_job(self, job_uuid, **kwargs):
-        # TODO: 업데이트 필드 확정
-        # TODO: 확정된 필드를 매개변수로 전부 넣어주고 default 값을 None으로 설정하여 모든 필드 값을 받도록 설정
-        pass
+    def update_job(self, job_uuid, name, image, parameters, next_job_names, depends_count):
+        job = Job.objects.get(uuid=job_uuid)
+
+        for arg, val in locals().items():
+            if val is not None:
+                setattr(job, arg, val)
+        job.save()
+
+        return job
 
     def delete_job(self, job_uuid):
         try:

@@ -28,6 +28,26 @@ class WorkflowCreateAPIView(APIView):
         return Response(workflow, status=status.HTTP_201_CREATED)
 
 
+class WorkflowUpdateAPIView(APIView):
+    '''
+    API View for updating the corresponding workflow record.
+    '''
+    def patch(self, request, workflow_uuid):
+        workflow_data = request.data.dict()
+        jobs_data = workflow_data.pop('jobs')
+
+        if not workflow_uuid:
+            return Response({'error': 'workflow uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        workflow_service = WorkflowService()
+        try:
+            workflow = workflow_service.update_workflow(workflow_uuid, workflow_data, jobs_data)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(workflow, status=status.HTTP_200_OK)
+
+
 class WorkflowDeleteAPIView(APIView):
     '''
     API View for deleting a Workflow instance along with associated Job instances.
@@ -45,7 +65,7 @@ class WorkflowDeleteAPIView(APIView):
         return Response({'success': f'Workflow with uuid {workflow_uuid} and associated jobs deleted successfully.'},
                         status=status.HTTP_204_NO_CONTENT)
 
-      
+
 class WorkflowExecuteAPIView(APIView):
     def get(self, request, workflow_uuid):
         '''
