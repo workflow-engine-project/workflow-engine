@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from project_apps.repository.workflow_repository import WorkflowRepository
 from project_apps.repository.job_repository import JobRepository
 from project_apps.api.serializers import serialize_workflow
@@ -53,6 +55,7 @@ class WorkflowService:
 
         return serialized_workflow
 
+    @transaction.atomic
     def delete_workflow(self, workflow_uuid):
         workflow = self.workflow_repository.get_workflow(workflow_uuid)
         jobs = self.job_repository.get_job_list(workflow_uuid)
