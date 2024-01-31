@@ -1,3 +1,5 @@
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
 from project_apps.models import Job
 
 class JobRepository:
@@ -22,7 +24,16 @@ class JobRepository:
         pass
 
     def delete_job(self, job_uuid):
-        Job.objects.get(uuid=job_uuid).delete()
+        try:
+            job = Job.objects.get(uuid=job_uuid)
+            job.delete()
+            return {'status': 'success', 'message': 'job deleted successfully'}
+        except ObjectDoesNotExist:
+            return {'status': 'error', 'message': 'job not found'}
+        except MultipleObjectsReturned:
+            return {'status': 'error', 'message': 'Multiple jobs found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
     def get_job_list(self, workflow_uuid):
         return Job.objects.filter(workflow_uuid = workflow_uuid)
