@@ -33,3 +33,7 @@ class WorkflowRepository:
             return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
+
+    def get_workflow_list(self):
+        workflow_list = Workflow.objects.all()
+        return list(workflow_list.values())

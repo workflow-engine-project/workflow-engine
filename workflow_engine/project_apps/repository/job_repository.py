@@ -17,7 +17,8 @@ class JobRepository:
         return job
         
     def get_job(self, job_uuid):
-        pass
+        job = Job.objects.get(uuid=job_uuid)
+        return job
 
     def update_job(self, job_uuid, name, image, parameters, next_job_names, depends_count):
         job = Job.objects.get(uuid=job_uuid)

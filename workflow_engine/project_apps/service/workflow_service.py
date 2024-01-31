@@ -10,7 +10,6 @@ from project_apps.models.cache import Cache
 from project_apps.engine.job_dependency import job_dependency
 
 
-
 class WorkflowService:
     def __init__(self):
         self.workflow_repository = WorkflowRepository()
@@ -62,6 +61,33 @@ class WorkflowService:
 
         return serialized_workflow
 
+    def get_workflow(self, workflow_uuid):
+        workflow = self.workflow_repository.get_workflow(workflow_uuid)
+        workflow_info = {
+            'uuid': workflow.uuid,
+            'name': workflow.name,
+            'description': workflow.description,
+            'created_at': workflow.created_at,
+            'updated_at': workflow.updated_at
+        }
+
+        jobs = self.job_repository.get_job_list(workflow_uuid)
+        jobs_info = []
+        for job in jobs:
+            jobs_info.append({
+                'uuid': job.uuid,
+                'workflow_uuid': job.workflow_uuid,
+                'name': job.name,
+                'image': job.image,
+                'parameters': job.parameters,
+                'next_job_names': job.next_job_names,
+                'depends_count': job.depends_count
+            })
+
+        workflow_info['jobs'] = jobs_info
+
+        return workflow_info
+
     def update_workflow(self, workflow_uuid, workflow_data, jobs_data):
         workflow = self.workflow_repository.update_workflow(
             workflow_uuid=workflow_uuid,
@@ -85,7 +111,7 @@ class WorkflowService:
                 parameters=job_data.get('parameters'),
                 next_job_names=job_data.get('next_job_names'),
                 depends_count=job_data.get('depends_count'),
-                )
+            )
             jobs_info.append({
                 'uuid': job.uuid,
                 'workflow_uuid': job.workflow_uuid,
@@ -111,6 +137,37 @@ class WorkflowService:
         # Jobs 삭제
         for job in jobs:
             self.job_repository.delete_job(job.uuid)
+
+    def get_workflow_list(self):
+        workflows = self.workflow_repository.get_workflow_list()
+        workflows_info = []
+        for workflow in workflows:
+            workflow_info = {
+                'uuid': workflow.uuid,
+                'name': workflow.name,
+                'description': workflow.description,
+                'created_at': workflow.created_at,
+                'updated_at': workflow.updated_at
+            }
+
+            jobs = self.job_repository.get_job_list(workflow.uuid)
+            jobs_info = []
+            for job in jobs:
+                jobs_info.append({
+                    'uuid': job.uuid,
+                    'workflow_uuid': job.workflow_uuid,
+                    'name': job.name,
+                    'image': job.image,
+                    'parameters': job.parameters,
+                    'next_job_names': job.next_job_names,
+                    'depends_count': job.depends_count
+                })
+            
+            workflow_info['jobs'] = jobs_info
+
+            workflows_info.append(workflow_info)
+
+        return workflows_info
 
 
 class WorkflowExecutor:
