@@ -1,8 +1,14 @@
+import orjson as json
+
 from django.db import transaction
 
 from project_apps.repository.workflow_repository import WorkflowRepository
 from project_apps.repository.job_repository import JobRepository
+from project_apps.repository.history_repository import HistoryRepository
 from project_apps.api.serializers import serialize_workflow
+from project_apps.models.cache import Cache
+from project_apps.engine.job_dependency import job_dependency
+
 
 class WorkflowService:
     def __init__(self):
@@ -66,3 +72,25 @@ class WorkflowService:
         # Jobs 삭제
         for job in jobs:
             self.job_repository.delete_job(job.uuid)
+
+
+class WorkflowExecutor:
+    def __init__(self):
+        self.job_repository = JobRepository()
+        self.history_repository = HistoryRepository()
+        self.cache = Cache()
+
+    def execute_workflow(self, workflow_uuid):
+        job_list = self.job_repository.get_job_list(workflow_uuid)
+        for job in job_list:
+            job['result'] = 'waiting'
+
+        if job_list:
+            job_list_json = json.dumps(job_list)
+            self.cache.set(workflow_uuid, job_list_json)
+            history = self.history_repository.create_history(workflow_uuid)
+            job_dependency.apply_async(args=[workflow_uuid, history.uuid])
+
+            return True
+        else:
+            return False

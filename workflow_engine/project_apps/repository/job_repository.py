@@ -36,4 +36,5 @@ class JobRepository:
             return {'status': 'error', 'message': str(e)}
 
     def get_job_list(self, workflow_uuid):
-        return Job.objects.filter(workflow_uuid = workflow_uuid)
+        job_list = Job.objects.filter(workflow_uuid = workflow_uuid)
+        return list(job_list.values())

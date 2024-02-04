@@ -4,8 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from project_apps.api.serializers import serialize_workflow
-from project_apps.service.workflow_service import WorkflowService
+from project_apps.service.workflow_service import WorkflowService, WorkflowExecutor
 
 
 class WorkflowCreateAPIView(APIView):
@@ -45,3 +44,20 @@ class WorkflowDeleteAPIView(APIView):
 
         return Response({'success': f'Workflow with uuid {workflow_uuid} and associated jobs deleted successfully.'},
                         status=status.HTTP_204_NO_CONTENT)
+
+      
+class WorkflowExecuteAPIView(APIView):
+    def get(self, request, workflow_uuid):
+        '''
+        Fetch the list of jobs to execute, belonging to the corresponding workflow uuid and cache it into Redis storage.
+
+        Request data
+        - uuid: workflow's uuid that you want to execute.
+        '''
+        workflow_executor = WorkflowExecutor()
+        result = workflow_executor.execute_workflow(workflow_uuid)
+
+        if result:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
