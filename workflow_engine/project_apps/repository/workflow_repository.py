@@ -1,3 +1,5 @@
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
 from project_apps.models import Workflow
 
 class WorkflowRepository:
@@ -6,7 +8,8 @@ class WorkflowRepository:
         return workflow
 
     def get_workflow(self, workflow_uuid):
-        pass
+        workflow = Workflow.objects.get(uuid=workflow_uuid)
+        return workflow
 
     def update_workflow(self, workflow_uuid, **kwargs):
         # TODO: 업데이트 필드 확정
@@ -14,4 +17,13 @@ class WorkflowRepository:
         pass
 
     def delete_workflow(self, workflow_uuid):
-        pass
+        try:
+            workflow = Workflow.objects.get(uuid=workflow_uuid)
+            workflow.delete()
+            return {'status': 'success', 'message': 'Workflow deleted successfully'}
+        except ObjectDoesNotExist:
+            return {'status': 'error', 'message': 'Workflow not found'}
+        except MultipleObjectsReturned:
+            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}

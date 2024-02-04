@@ -28,6 +28,24 @@ class WorkflowCreateAPIView(APIView):
         return Response(workflow, status=status.HTTP_201_CREATED)
 
 
+class WorkflowDeleteAPIView(APIView):
+    '''
+    API View for deleting a Workflow instance along with associated Job instances.
+    '''
+
+    def delete(self, request, workflow_uuid):
+        workflow_service = WorkflowService()
+
+        try:
+            # Workflow 및 해당 Workflow에 종속된 Jobs를 삭제
+            workflow_service.delete_workflow(workflow_uuid)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'success': f'Workflow with uuid {workflow_uuid} and associated jobs deleted successfully.'},
+                        status=status.HTTP_204_NO_CONTENT)
+
+      
 class WorkflowExecuteAPIView(APIView):
     def get(self, request, workflow_uuid):
         '''
