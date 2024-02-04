@@ -23,3 +23,7 @@ class JobRepository:
 
     def delete_job(self, job_uuid):
         pass
+
+    def get_job_list(self, workflow_uuid):
+        job_list = Job.objects.filter(workflow_uuid = workflow_uuid)
+        return list(job_list.values())
