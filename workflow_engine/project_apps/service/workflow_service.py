@@ -1,15 +1,16 @@
-import json
 import threading
 
-from project_apps.constants import HISTORY_STATUS_SUCCESS, HISTORY_STATUS_FAIL, JOB_STATUS_SUCCESS, JOB_STATUS_WAITING
-from project_apps.repository.workflow_repository import WorkflowRepository
-from project_apps.repository.job_repository import JobRepository
-from project_apps.repository.history_repository import HistoryRepository
+import orjson as json
+from django.db import transaction
+
 from project_apps.api.serializers import serialize_workflow
-from project_apps.models.cache import Cache
+from project_apps.constants import HISTORY_STATUS_FAIL, HISTORY_STATUS_SUCCESS, JOB_STATUS_SUCCESS, JOB_STATUS_WAITING
 from project_apps.engine.job_dependency import job_dependency
 from project_apps.engine.job_execute import job_execute
-
+from project_apps.models.cache import Cache
+from project_apps.repository.history_repository import HistoryRepository
+from project_apps.repository.job_repository import JobRepository
+from project_apps.repository.workflow_repository import WorkflowRepository
 
 
 class WorkflowService:
@@ -62,15 +63,140 @@ class WorkflowService:
         serialized_workflow = serialize_workflow(workflow_info, jobs_info)
 
         return serialized_workflow
+            
+    def get_workflow(self, workflow_uuid):
+        workflow = self.workflow_repository.get_workflow(workflow_uuid)
+        workflow_info = {
+            'uuid': workflow.uuid,
+            'name': workflow.name,
+            'description': workflow.description,
+            'created_at': workflow.created_at,
+            'updated_at': workflow.updated_at
+        }
 
+        jobs = self.job_repository.get_job_list(workflow_uuid)
+        jobs_info = []
+        for job in jobs:
+            jobs_info.append({
+                'uuid': job.uuid,
+                'workflow_uuid': job.workflow_uuid,
+                'name': job.name,
+                'image': job.image,
+                'parameters': job.parameters,
+                'next_job_names': job.next_job_names,
+                'depends_count': job.depends_count
+            })
 
+        workflow_info['jobs'] = jobs_info
+
+        return workflow_info
+
+    def update_workflow(self, workflow_uuid, workflow_data, jobs_data):
+        workflow = self.workflow_repository.update_workflow(
+            workflow_uuid=workflow_uuid,
+            name=workflow_data.get('name'),
+            description=workflow_data.get('description')
+        )
+        workflow_info = {
+            'uuid': workflow.uuid,
+            'name': workflow.name,
+            'description': workflow.description,
+            'created_at': workflow.created_at,
+            'updated_at': workflow.updated_at
+        }
+
+        jobs_info = []
+        for job_data in jobs_data:
+            job = self.job_repository.update_job(
+                job_uuid=job_data.get('uuid'),
+                name=job_data.get('name'),
+                image=job_data.get('image'),
+                parameters=job_data.get('parameters'),
+                next_job_names=job_data.get('next_job_names'),
+                depends_count=job_data.get('depends_count'),
+            )
+            jobs_info.append({
+                'uuid': job.uuid,
+                'workflow_uuid': job.workflow_uuid,
+                'name': job.name,
+                'image': job.image,
+                'parameters': job.parameters,
+                'next_job_names': job.next_job_names,
+                'depends_count': job.depends_count
+            })
+
+        workflow_info['jobs'] = jobs_info
+
+        return workflow_info
+
+    @transaction.atomic
+    def delete_workflow(self, workflow_uuid):
+        workflow = self.workflow_repository.get_workflow(workflow_uuid)
+        jobs = self.job_repository.get_job_list(workflow_uuid)
+
+        # Workflow 삭제
+        self.workflow_repository.delete_workflow(workflow.uuid)
+
+        # Jobs 삭제
+        for job in jobs:
+            self.job_repository.delete_job(job.uuid)
+
+    def get_workflow_list(self):
+        workflows = self.workflow_repository.get_workflow_list()
+        workflows_info = []
+        for workflow in workflows:
+            workflow_info = {
+                'uuid': workflow.uuid,
+                'name': workflow.name,
+                'description': workflow.description,
+                'created_at': workflow.created_at,
+                'updated_at': workflow.updated_at
+            }
+
+            jobs = self.job_repository.get_job_list(workflow.uuid)
+            jobs_info = []
+            for job in jobs:
+                jobs_info.append({
+                    'uuid': job.uuid,
+                    'workflow_uuid': job.workflow_uuid,
+                    'name': job.name,
+                    'image': job.image,
+                    'parameters': job.parameters,
+                    'next_job_names': job.next_job_names,
+                    'depends_count': job.depends_count
+                })
+            
+            workflow_info['jobs'] = jobs_info
+
+            workflows_info.append(workflow_info)
+
+        return workflows_info
+      
+      
 class WorkflowExecutor:
     '''
     워크플로우 실행을 관리하는 서비스.
     '''
     def __init__(self):
+        self.job_repository = JobRepository()
+        self.history_repository = HistoryRepository()
         self.cache = Cache()
         self.lock = threading.Lock()
+        
+    def execute_workflow(self, workflow_uuid):
+        job_list = self.job_repository.get_job_list(workflow_uuid)
+        for job in job_list:
+            job['result'] = 'waiting'
+
+        if job_list:
+            job_list_json = json.dumps(job_list)
+            self.cache.set(workflow_uuid, job_list_json)
+            history = self.history_repository.create_history(workflow_uuid)
+            job_dependency.apply_async(args=[workflow_uuid, history.uuid])
+
+            return True
+        else:
+            return False
         
     def find_job_data(self, workflow_uuid, job_uuid):
         '''
@@ -140,5 +266,5 @@ class WorkflowExecutor:
 
         if completed:
             history_repo.update_history_status(history_uuid, HISTORY_STATUS_SUCCESS)
-            print("workflow 끝났다!!!")
             self.cache.delete(workflow_uuid)
+            
