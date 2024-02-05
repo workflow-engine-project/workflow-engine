@@ -186,7 +186,8 @@ class WorkflowExecutor:
     def execute_workflow(self, workflow_uuid):
         job_list = self.job_repository.get_job_list(workflow_uuid)
         for job in job_list:
-            job['result'] = 'waiting'
+            job['result'] = JOB_STATUS_WAITING
+            job['uuid'] = str(job['uuid'])
 
         if job_list:
             job_list_json = json.dumps(job_list)
