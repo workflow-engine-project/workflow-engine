@@ -15,10 +15,17 @@ class JobRepository:
         )
         
         return job
-        
+
     def get_job(self, job_uuid):
-        job = Job.objects.get(uuid=job_uuid)
-        return job
+        try:
+            job = Job.objects.get(uuid=job_uuid)
+            return job
+        except ObjectDoesNotExist:
+            return {'status': 'error', 'message': 'Workflow not found'}
+        except MultipleObjectsReturned:
+            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
     def update_job(self, job_uuid, name, image, parameters, next_job_names, depends_count):
         job = Job.objects.get(uuid=job_uuid)
