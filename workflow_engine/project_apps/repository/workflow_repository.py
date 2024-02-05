@@ -20,14 +20,21 @@ class WorkflowRepository:
             return {'status': 'error', 'message': str(e)}
 
     def update_workflow(self, workflow_uuid, name, description):
-        workflow = Workflow.objects.get(uuid=workflow_uuid)
+        try:
+            workflow = Workflow.objects.get(uuid=workflow_uuid)
+            
+            for arg, val in locals().items():
+                if val is not None:
+                    setattr(workflow, arg, val)
+            workflow.save()
 
-        for arg, val in locals().items():
-            if val is not None:
-                setattr(workflow, arg, val)
-        workflow.save()
-
-        return workflow
+            return workflow
+        except ObjectDoesNotExist:
+            return {'status': 'error', 'message': 'Workflow not found'}
+        except MultipleObjectsReturned:
+            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
     def delete_workflow(self, workflow_uuid):
         try:
