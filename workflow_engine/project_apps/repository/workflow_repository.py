@@ -9,8 +9,15 @@ class WorkflowRepository:
         return workflow
 
     def get_workflow(self, workflow_uuid):
-        workflow = Workflow.objects.get(uuid=workflow_uuid)
-        return workflow
+        try:
+            workflow = Workflow.objects.get(uuid=workflow_uuid)
+            return workflow
+        except ObjectDoesNotExist:
+            return {'status': 'error', 'message': 'Workflow not found'}
+        except MultipleObjectsReturned:
+            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
     def update_workflow(self, workflow_uuid, name, description):
         workflow = Workflow.objects.get(uuid=workflow_uuid)
