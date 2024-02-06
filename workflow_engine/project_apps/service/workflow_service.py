@@ -78,13 +78,13 @@ class WorkflowService:
         jobs_info = []
         for job in jobs:
             jobs_info.append({
-                'uuid': job.uuid,
-                'workflow_uuid': job.workflow_uuid,
-                'name': job.name,
-                'image': job.image,
-                'parameters': job.parameters,
-                'next_job_names': job.next_job_names,
-                'depends_count': job.depends_count
+                'uuid': job['uuid'],  # 수정 부분임!
+                # 'workflow_uuid': job['workflow_uuid'],
+                'name': job['name'],
+                'image': job['image'],
+                'parameters': job['parameters'],
+                'next_job_names': job['next_job_names'],
+                'depends_count': job['depends_count']
             })
 
         workflow_info['jobs'] = jobs_info
