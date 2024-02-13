@@ -19,5 +19,5 @@ class HistoryRepository:
         '''
         워크플로우가 성공적으로 종료 될 경우 또는 실패 할 경우 워크플로우의 실행 이력(history) 상태를 업데이트.
         '''
-        completed_at = timezone.now() if status != HISTORY_STATUS_SUCCESS else None
+        completed_at = timezone.now()
         History.objects.filter(uuid=history_uuid).update(status=status, completed_at=completed_at)
