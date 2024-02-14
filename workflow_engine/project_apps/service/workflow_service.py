@@ -91,6 +91,7 @@ class WorkflowService:
 
         return workflow_info
 
+    @transaction.atomic
     def update_workflow(self, workflow_uuid, workflow_data, jobs_data):
         workflow = self.workflow_repository.update_workflow(
             workflow_uuid=workflow_uuid,
