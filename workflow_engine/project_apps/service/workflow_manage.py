@@ -1,5 +1,3 @@
-import threading
-
 import orjson as json
 
 from project_apps.constants import HISTORY_STATUS_FAIL, HISTORY_STATUS_SUCCESS, JOB_STATUS_SUCCESS
@@ -7,6 +5,7 @@ from project_apps.engine.tasks_manager import job_dependency
 from project_apps.models.cache import Cache
 from project_apps.repository.history_repository import HistoryRepository
 from project_apps.repository.job_repository import JobRepository
+from project_apps.service.lock_utils import with_lock
 
 
 class WorkflowManager:
@@ -17,7 +16,6 @@ class WorkflowManager:
         self.job_repository = JobRepository()
         self.history_repository = HistoryRepository()
         self.cache = Cache()
-        self.lock = threading.Lock()
         
     def find_job_data(self, workflow_uuid, job_uuid):
         '''
@@ -30,41 +28,38 @@ class WorkflowManager:
                 return job
         return None
 
+    @with_lock
     def update_job_status(self, workflow_uuid, job_uuid, status):
         '''
         특정 작업의 상태를 업데이트하고, 변경된 워크플로우 데이터를 캐시에 저장.
         '''
-        with self.lock:
-            workflow_data = json.loads(self.cache.get(workflow_uuid))
-            for job in workflow_data:
-                if job['uuid'] == str(job_uuid):
-                    job['result'] = status
-                    break
-            
-            self.cache.set(workflow_uuid, json.dumps(workflow_data))
+        workflow_data = json.loads(self.cache.get(workflow_uuid))
+        for job in workflow_data:
+            if job['uuid'] == str(job_uuid):
+                job['result'] = status
+                break
+        
+        self.cache.set(workflow_uuid, json.dumps(workflow_data))
 
+    @with_lock
     def handle_success(self, job_data, workflow_uuid, history_uuid, history_repo):
         '''
         성공한 작업을 처리하고, 해당 작업에 의존하는 다음 작업들의 상태를 업데이트.
         '''
         updated = False 
 
-        with self.lock:
-            workflow_data = json.loads(self.cache.get(workflow_uuid))
-            next_job_names_str = job_data.next_job_names
-            next_job_names = json.loads(next_job_names_str)
-
-            if next_job_names: 
-                for next_job_name in next_job_names:
-                    for job in workflow_data:
-                        if job['name'] == next_job_name:
-                            job['depends_count'] -= 1
-                            updated = True
-
-            if updated:
-                self.cache.set(workflow_uuid, json.dumps(workflow_data))
+        workflow_data = json.loads(self.cache.get(workflow_uuid))
+        if 'next_job_names' in job_data and job_data['next_job_names']:
+            next_job_names_str = job_data['next_job_names'].strip("[]")
+            next_job_names = [name.strip(" '\"") for name in next_job_names_str.split(',')]
+            for next_job_name in next_job_names:
+                for job in workflow_data:
+                    if job['name'] == next_job_name:
+                        job['depends_count'] -= 1
+                        updated = True
 
         if updated:
+            self.cache.set(workflow_uuid, json.dumps(workflow_data))
             job_dependency(workflow_uuid, history_uuid)
 
         self.check_workflow_completion(workflow_uuid, history_uuid, history_repo)

@@ -1,4 +1,5 @@
 import orjson as json
+
 from django.db import transaction
 
 from project_apps.api.serializers import serialize_workflow
@@ -8,6 +9,7 @@ from project_apps.models.cache import Cache
 from project_apps.repository.history_repository import HistoryRepository
 from project_apps.repository.job_repository import JobRepository
 from project_apps.repository.workflow_repository import WorkflowRepository
+from project_apps.service.lock_utils import with_lock
 
 
 class WorkflowService:
@@ -172,6 +174,7 @@ class WorkflowService:
 
         return workflows_info
     
+    @with_lock    
     def execute_workflow(self, workflow_uuid):
         job_list = self.job_repository.get_job_list(workflow_uuid)
         for job in job_list:
