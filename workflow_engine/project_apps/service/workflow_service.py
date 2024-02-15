@@ -5,7 +5,7 @@ from django.db import transaction
 
 from project_apps.api.serializers import serialize_workflow
 from project_apps.constants import HISTORY_STATUS_FAIL, HISTORY_STATUS_SUCCESS, JOB_STATUS_SUCCESS, JOB_STATUS_WAITING
-from project_apps.engine.job_dependency import job_dependency
+from project_apps.engine.tasks_manager import job_dependency
 from project_apps.models.cache import Cache
 from project_apps.repository.history_repository import HistoryRepository
 from project_apps.repository.job_repository import JobRepository
@@ -193,7 +193,7 @@ class WorkflowExecutor:
             job_list_json = json.dumps(job_list)
             self.cache.set(workflow_uuid, job_list_json)
             history = self.history_repository.create_history(workflow_uuid)
-            job_dependency.apply_async(args=[workflow_uuid, history.uuid])
+            job_dependency(workflow_uuid, history.uuid)
 
             return True
         else:
@@ -224,6 +224,9 @@ class WorkflowExecutor:
             self.cache.set(workflow_uuid, json.dumps(workflow_data))
 
     def handle_success(self, job_data, workflow_uuid, history_uuid, history_repo):
+        '''
+        성공한 작업을 처리하고, 해당 작업에 의존하는 다음 작업들의 상태를 업데이트.
+        '''
         updated = False 
 
         with self.lock:
@@ -241,7 +244,7 @@ class WorkflowExecutor:
                 self.cache.set(workflow_uuid, json.dumps(workflow_data))
 
         if updated:
-            job_dependency.apply_async(args=[workflow_uuid, history_uuid])
+            job_dependency(workflow_uuid, history_uuid)
 
         self.check_workflow_completion(workflow_uuid, history_uuid, history_repo)
 

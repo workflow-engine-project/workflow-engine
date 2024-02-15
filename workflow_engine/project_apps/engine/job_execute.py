@@ -4,12 +4,12 @@ from requests.exceptions import ReadTimeout, ConnectionError
 
 from project_apps.constants import JOB_STATUS_RUNNING, JOB_STATUS_SUCCESS, JOB_STATUS_FAIL
 from project_apps.repository.history_repository import HistoryRepository
+from project_apps.service.workflow_service import WorkflowExecutor
 
 
 @shared_task
 def job_execute(workflow_uuid, history_uuid, job_uuid):
     client = docker.from_env()
-    from project_apps.service.workflow_service import WorkflowExecutor
     workflow_executor = WorkflowExecutor()
     history_repo = HistoryRepository()
 
