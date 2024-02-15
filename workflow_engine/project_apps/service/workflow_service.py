@@ -6,7 +6,6 @@ from django.db import transaction
 from project_apps.api.serializers import serialize_workflow
 from project_apps.constants import HISTORY_STATUS_FAIL, HISTORY_STATUS_SUCCESS, JOB_STATUS_SUCCESS, JOB_STATUS_WAITING
 from project_apps.engine.job_dependency import job_dependency
-from project_apps.engine.job_execute import job_execute
 from project_apps.models.cache import Cache
 from project_apps.repository.history_repository import HistoryRepository
 from project_apps.repository.job_repository import JobRepository
@@ -236,13 +235,13 @@ class WorkflowExecutor:
                         if job['name'] == next_job_name:
                             job['depends_count'] -= 1
                             updated = True
-                            if job['depends_count'] == 0:
-                                job_execute.apply_async(args=[workflow_uuid, history_uuid, job['uuid']])
-                            break
 
             if updated:
                 self.cache.set(workflow_uuid, json.dumps(workflow_data))
-        
+
+        if updated:
+            job_dependency.apply_async(args=[workflow_uuid, history_uuid])
+
         self.check_workflow_completion(workflow_uuid, history_uuid, history_repo)
 
     def handle_failure(self, history_uuid, workflow_uuid, history_repo):
