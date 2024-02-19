@@ -7,7 +7,7 @@ from rest_framework import status
 from project_apps.service.workflow_service import WorkflowService
 
 
-class WorkflowCreateAPIView(APIView):
+class WorkflowAPIView(APIView):
     '''
     API View for creating a new Workflow instance along with associated Job instances.
     '''
@@ -27,8 +27,6 @@ class WorkflowCreateAPIView(APIView):
         
         return Response(workflow, status=status.HTTP_201_CREATED)
 
-
-class WorkflowReadAPIView(APIView):
     '''
     API View for reading the corresponding workflow record.
     '''
@@ -44,8 +42,6 @@ class WorkflowReadAPIView(APIView):
         
         return Response(workflow, status=status.HTTP_200_OK)
 
-
-class WorkflowUpdateAPIView(APIView):
     '''
     API View for updating the corresponding workflow record.
     '''
@@ -64,8 +60,6 @@ class WorkflowUpdateAPIView(APIView):
 
         return Response(workflow, status=status.HTTP_200_OK)
 
-
-class WorkflowDeleteAPIView(APIView):
     '''
     API View for deleting a Workflow instance along with associated Job instances.
     '''
