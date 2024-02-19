@@ -139,7 +139,7 @@ class WorkflowService:
 
         # Jobs 삭제
         for job in jobs:
-            self.job_repository.delete_job(job.uuid)
+            self.job_repository.delete_job(job['uuid'])
 
     def get_workflow_list(self):
         workflows = self.workflow_repository.get_workflow_list()
