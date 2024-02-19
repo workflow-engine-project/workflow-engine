@@ -1,4 +1,4 @@
-import docker
+import docker, json
 from celery import shared_task
 from requests.exceptions import ReadTimeout, ConnectionError
 
@@ -21,8 +21,8 @@ def job_execute(workflow_uuid, history_uuid, job_uuid):
     try:
         workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_RUNNING)
         image = client.images.pull(job_data['image'])
-        container = client.containers.run(image, detach=True)
-        # container = client.containers.run(image, detach=True, environment=job_data.get('parameters', {}))
+        environment = json.loads(job_data.get('parameters'))
+        container = client.containers.run(image, detach=True, environment=environment)
         result = container.wait(timeout=60)
         
         if result['StatusCode'] == 0:
