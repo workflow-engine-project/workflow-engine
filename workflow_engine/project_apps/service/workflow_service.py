@@ -119,7 +119,7 @@ class WorkflowService:
             )
             jobs_info.append({
                 'uuid': job.uuid,
-                'workflow_uuid': job.workflow_uuid,
+                # 'workflow_uuid': job.workflow_uuid,
                 'name': job.name,
                 'image': job.image,
                 'parameters': job.parameters,
@@ -148,24 +148,25 @@ class WorkflowService:
         workflows_info = []
         for workflow in workflows:
             workflow_info = {
-                'uuid': workflow.uuid,
-                'name': workflow.name,
-                'description': workflow.description,
-                'created_at': workflow.created_at,
-                'updated_at': workflow.updated_at
+                'uuid': workflow['uuid'],
+                'name': workflow['name'],
+                'description': workflow['description'],
+                'created_at': workflow['created_at'],
+                'updated_at': workflow['updated_at']
             }
 
-            jobs = self.job_repository.get_job_list(workflow.uuid)
+            jobs = self.job_repository.get_job_list(workflow['uuid'])
             jobs_info = []
             for job in jobs:
+                print(job)
                 jobs_info.append({
-                    'uuid': job.uuid,
-                    'workflow_uuid': job.workflow_uuid,
-                    'name': job.name,
-                    'image': job.image,
-                    'parameters': job.parameters,
-                    'next_job_names': job.next_job_names,
-                    'depends_count': job.depends_count
+                    'uuid': job['uuid'],
+                    # 'workflow_uuid': job['workflow_uuid'],
+                    'name': job['name'],
+                    'image': job['image'],
+                    'parameters': job['parameters'],
+                    'next_job_names': job['next_job_names'],
+                    'depends_count': job['depends_count']
                 })
             
             workflow_info['jobs'] = jobs_info
