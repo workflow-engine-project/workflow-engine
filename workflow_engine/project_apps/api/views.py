@@ -142,3 +142,17 @@ class SchedulingAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(scheduling, status=status.HTTP_200_OK)
+
+    '''
+    API View for deleting a scheduling instance.
+    '''
+    def delete(self, request, scheduling_uuid):
+        scheduling_service = SchedulingService()
+
+        try:
+            scheduling_service.delete_scheduling(scheduling_uuid)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'success': f'Scheduling with uuid {scheduling_uuid} deleted successfully.'},
+                        status=status.HTTP_204_NO_CONTENT)
