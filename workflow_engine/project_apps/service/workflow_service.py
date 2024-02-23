@@ -3,7 +3,7 @@ import orjson as json
 from django.db import transaction
 
 from project_apps.api.serializers import serialize_workflow
-from project_apps.constants import JOB_STATUS_WAITING
+from project_apps.constants import JOB_STATUS_WAITING, WORKFLOW_STATUS_RUNNING
 from project_apps.engine.tasks_manager import job_dependency
 from project_apps.models.cache import Cache
 from project_apps.repository.history_repository import HistoryRepository
@@ -176,6 +176,10 @@ class WorkflowService:
     
     @with_lock    
     def execute_workflow(self, workflow_uuid):
+        self.cache.delete(f"{workflow_uuid}")  
+        self.cache.delete(f"{workflow_uuid}_status")  
+        self.cache.delete(f"{workflow_uuid}_running_containers")
+
         job_list = self.job_repository.get_job_list(workflow_uuid)
         for job in job_list:
             job['result'] = JOB_STATUS_WAITING
@@ -183,7 +187,10 @@ class WorkflowService:
 
         if job_list:
             job_list_json = json.dumps(job_list)
-            self.cache.set(workflow_uuid, job_list_json)
+            self.cache.set(workflow_uuid, job_list_json)            
+            self.cache.set(f"{workflow_uuid}_status", WORKFLOW_STATUS_RUNNING)
+            self.cache.set(f"{workflow_uuid}_running_containers", [])
+
             history = self.history_repository.create_history(workflow_uuid)
             job_dependency(workflow_uuid, history.uuid)
 
