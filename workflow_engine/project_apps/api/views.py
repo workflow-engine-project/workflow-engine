@@ -127,6 +127,21 @@ class SchedulingAPIView(APIView):
         return Response(scheduling, status=status.HTTP_201_CREATED)
 
     '''
+    API View for reading the corresponding scheduling record.
+    '''
+    def get(self, request, scheduling_uuid):
+        if not scheduling_uuid:
+            return Response({'error': 'scheduling uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        scheduling_service = SchedulingService()
+        try:
+            scheduling = scheduling_service.get_scheduling(scheduling_uuid)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(scheduling, status=status.HTTP_200_OK)
+
+    '''
     API View for updating the corresponding scheduling record.
     '''
     def patch(self, request, scheduling_uuid):
@@ -156,3 +171,14 @@ class SchedulingAPIView(APIView):
 
         return Response({'success': f'Scheduling with uuid {scheduling_uuid} deleted successfully.'},
                         status=status.HTTP_204_NO_CONTENT)
+
+
+class SchedulingListReadAPIView(APIView):
+    '''
+    API View for reading the whole scheduling list.
+    '''
+    def get(self, request, workflow_uuid):
+        scheduling_service = SchedulingService()
+        scheduling_list = scheduling_service.get_scheduling_list(workflow_uuid)
+
+        return Response(scheduling_list, status=status.HTTP_200_OK)
