@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from project_apps.repository.scheduling_repository import SchedulingRepository
 
 
@@ -13,13 +15,22 @@ class SchedulingService:
             is_active=is_active,
         )
 
-        # 스케줄링 정보 생성
+    @transaction.atomic
+    def update_scheduling(self, scheduling_uuid, scheduling_data):
+        scheduling = self.scheduling_repository.update_scheduling(
+            scheduling_uuid,
+            scheduled_at=scheduling_data.get('scheduled_at'),
+            interval=scheduling_data.get('interval'),
+            is_active=scheduling_data.get('is_active'),
+        )
         scheduling_info = {
             'uuid': scheduling.uuid,
             'workflow_uuid': scheduling.workflow_uuid,
             'scheduled_at': scheduling.scheduled_at,
             'interval': scheduling.interval,
             'is_active': scheduling.is_active,
+            'created_at': scheduling.created_at,
+            'updated_at': scheduling.updated_at,
         }
 
         return scheduling_info

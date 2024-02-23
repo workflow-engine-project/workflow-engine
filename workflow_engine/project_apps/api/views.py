@@ -105,7 +105,6 @@ class WorkflowExecuteAPIView(APIView):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-
 class SchedulingAPIView(APIView):
     '''
     API View for creating a new Scheduling instance.
@@ -126,3 +125,20 @@ class SchedulingAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(scheduling, status=status.HTTP_201_CREATED)
+
+    '''
+    API View for updating the corresponding scheduling record.
+    '''
+    def patch(self, request, scheduling_uuid):
+        scheduling_data = request.data
+
+        if not scheduling_uuid:
+            return Response({'error': 'scheduling uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        scheduling_service = SchedulingService()
+        try:
+            scheduling = scheduling_service.update_scheduling(scheduling_uuid, scheduling_data)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(scheduling, status=status.HTTP_200_OK)
