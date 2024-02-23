@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from project_apps.service.workflow_service import WorkflowService
+from project_apps.service.scheduling_service import SchedulingService
 
 
 class WorkflowAPIView(APIView):
@@ -103,3 +104,25 @@ class WorkflowExecuteAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class SchedulingAPIView(APIView):
+    '''
+    API View for creating a new Scheduling instance.
+    '''
+    def post(self, request):
+        workflow_uuid = request.data.get('workflow_uuid')
+        scheduled_at = request.data.get('scheduled_at')
+        interval = request.data.get('interval')
+        is_active = request.data.get('is_active')
+
+        if not workflow_uuid:
+            return Response({'error': 'workflow_uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        scheduling_service = SchedulingService()
+        try:
+            scheduling = scheduling_service.create_scheduling(workflow_uuid, scheduled_at, interval, is_active)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(scheduling, status=status.HTTP_201_CREATED)
