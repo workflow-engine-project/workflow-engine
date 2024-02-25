@@ -69,7 +69,7 @@ DATABASES = {
         'NAME': env('POSTGRESQL_NAME'), # 데이터베이스 이름
         'USER': env('POSTGRESQL_USER'),
         'PASSWORD': env('POSTGRESQL_PWD'),
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': env('POSTGRESQL_PORT'),
     }
 }
