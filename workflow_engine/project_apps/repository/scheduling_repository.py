@@ -18,7 +18,7 @@ class SchedulingRepository:
             return {'status': 'error', 'message': 'Multiple schedulings found with the same UUID'}
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
-    
+
     def get_scheduling_list(self, workflow_uuid):
         scheduling_list = Scheduling.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'workflow_uuid', 'scheduled_at', 'interval', 'is_active', 'created_at', 'updated_at')
         return list(scheduling_list.values())

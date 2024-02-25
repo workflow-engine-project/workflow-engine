@@ -30,7 +30,7 @@ class SchedulingService:
         }
 
         return scheduling_info
-    
+
     def get_scheduling_list(self, workflow_uuid):
         schedulings = self.scheduling_repository.get_scheduling_list(workflow_uuid)
         schedulings_info = []
