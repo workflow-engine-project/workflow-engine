@@ -37,6 +37,8 @@ class SchedulingRepository:
             return {'status': 'error', 'message': 'Scheduling not found'}
         except MultipleObjectsReturned:
             return {'status': 'error', 'message': 'Multiple schedulings found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
     def delete_scheduling(self, scheduling_uuid):
         try:
