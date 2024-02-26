@@ -49,9 +49,10 @@ class WorkflowManager:
         updated = False 
 
         workflow_data = json.loads(self.cache.get(workflow_uuid))
-        if 'next_job_names' in job_data and job_data['next_job_names']:
-            next_job_names_str = job_data['next_job_names'].strip("[]")
-            next_job_names = [name.strip(" '\"") for name in next_job_names_str.split(',')]
+        next_job_names_str = job_data.next_job_names
+        next_job_names = json.loads(next_job_names_str)
+
+        if next_job_names: 
             for next_job_name in next_job_names:
                 for job in workflow_data:
                     if job['name'] == next_job_name:
