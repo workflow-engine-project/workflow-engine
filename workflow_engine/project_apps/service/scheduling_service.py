@@ -1,3 +1,5 @@
+import orjson as json
+
 from django.db import transaction
 
 from project_apps.repository.scheduling_repository import SchedulingRepository
@@ -34,3 +36,10 @@ class SchedulingService:
         }
 
         return scheduling_info
+
+    @transaction.atomic
+    def delete_scheduling(self, scheduling_uuid):
+        scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
+
+        # scheduling 삭제
+        self.scheduling_repository.delete_scheduling(scheduling.uuid)
