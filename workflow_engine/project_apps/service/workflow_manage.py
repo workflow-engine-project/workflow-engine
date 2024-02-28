@@ -81,8 +81,8 @@ class WorkflowManager:
         updated = False 
 
         workflow_data = json.loads(self.cache.get(workflow_uuid))
-        next_job_names_str = job_data.next_job_names
-        next_job_names = json.loads(next_job_names_str)
+        next_job_names_str = job_data.get('next_job_names',[])
+        next_job_names = json.loads(next_job_names_str.replace("'", "\""))
 
         if next_job_names: 
             for next_job_name in next_job_names:
