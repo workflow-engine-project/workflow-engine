@@ -16,6 +16,36 @@ class SchedulingService:
             interval=interval,
             is_active=is_active,
         )
+  
+    def get_scheduling(self, scheduling_uuid):
+        scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
+        scheduling_info = {
+            'uuid': scheduling.uuid,
+            'workflow_uuid': scheduling.workflow_uuid,
+            'scheduled_at': scheduling.scheduled_at,
+            'interval': scheduling.interval,
+            'is_active': scheduling.is_active,
+            'created_at': scheduling.created_at,
+            'updated_at': scheduling.updated_at
+        }
+
+        return scheduling_info
+
+    def get_scheduling_list(self, workflow_uuid):
+        schedulings = self.scheduling_repository.get_scheduling_list(workflow_uuid)
+        schedulings_info = []
+        for scheduling in schedulings:
+            schedulings_info.append({
+                'uuid': scheduling['uuid'],
+                'workflow_uuid': scheduling['workflow_uuid'],
+                'scheduled_at': scheduling['scheduled_at'],
+                'interval': scheduling['interval'],
+                'is_active': scheduling['is_active'],
+                'created_at': scheduling['created_at'],
+                'updated_at': scheduling['updated_at'],
+            })
+
+        return schedulings_info
 
     @transaction.atomic
     def update_scheduling(self, scheduling_uuid, scheduling_data):
