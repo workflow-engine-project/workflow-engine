@@ -41,7 +41,9 @@ class WorkflowService:
                 image=job_data['image'],
                 parameters=job_data.get('parameters', {}),
                 next_job_names=job_data.get('next_job_names', []),
-                depends_count=depends_count[job_data['name']]
+                depends_count=depends_count[job_data['name']],
+                timeout=job_data.get('timeout', 0),
+                retries=job_data.get('retries', 0)
             )
 
             jobs_info.append({
@@ -49,8 +51,10 @@ class WorkflowService:
             'name': job.name,
             'image': job.image,
             'parameters': job.parameters,
+            'next_job_names': job.next_job_names,
             'depends_count': job.depends_count,
-            'next_job_names': job.next_job_names
+            'timeout': job.timeout,
+            'retries': job.retries
             })
         
         # 워크플로우 정보 생성
@@ -85,7 +89,9 @@ class WorkflowService:
                 'image': job['image'],
                 'parameters': job['parameters'],
                 'next_job_names': job['next_job_names'],
-                'depends_count': job['depends_count']
+                'depends_count': job['depends_count'],
+                'timeout': job['timeout'],
+                'retries': job['retries']
             })
 
         workflow_info['jobs'] = jobs_info
@@ -116,6 +122,8 @@ class WorkflowService:
                 parameters=job_data.get('parameters'),
                 next_job_names=job_data.get('next_job_names'),
                 depends_count=job_data.get('depends_count'),
+                timeout=job_data.get('timeout'),
+                retries=job_data.get('retries')
             )
             jobs_info.append({
                 'uuid': job.uuid,
@@ -124,7 +132,9 @@ class WorkflowService:
                 'image': job.image,
                 'parameters': job.parameters,
                 'next_job_names': job.next_job_names,
-                'depends_count': job.depends_count
+                'depends_count': job.depends_count,
+                'timeout': job.timeout,
+                'retries': job.retries
             })
 
         workflow_info['jobs'] = jobs_info
@@ -166,7 +176,9 @@ class WorkflowService:
                     'image': job['image'],
                     'parameters': job['parameters'],
                     'next_job_names': job['next_job_names'],
-                    'depends_count': job['depends_count']
+                    'depends_count': job['depends_count'],
+                    'timeout': job['timeout'],
+                    'retries': job['retries']
                 })
             
             workflow_info['jobs'] = jobs_info

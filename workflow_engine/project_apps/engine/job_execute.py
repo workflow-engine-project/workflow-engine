@@ -1,4 +1,6 @@
-import docker
+from time import time
+
+import docker, orjson as json
 from docker.errors import ImageNotFound, APIError
 from celery import shared_task
 from requests.exceptions import ReadTimeout, ConnectionError
@@ -25,31 +27,40 @@ def job_execute(workflow_uuid, history_uuid, job_uuid):
         if not workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_RUNNING):
             return
         image = client.images.pull(job_data['image'])
-        container = client.containers.run(image, detach=True)
-        # environment = json.loads(job_data.get('parameters', '{}'))
-        # container = client.containers.run(image, detach=True, environment=environment, tty=True)
-        workflow_manager.add_container_to_running_list(workflow_uuid, container.id)
-        result = container.wait(timeout=60)
+        parameters = job_data.get('parameters', '{}')
+        environment = json.loads(parameters.replace("'", "\""))
+        timeout = job_data['timeout']
+        retries = job_data['retries']
+        if not timeout:
+            timeout = 60
         
-        if result['StatusCode'] == 0:
-            if not workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_SUCCESS):
-                return
-            workflow_manager.handle_success(job_data, workflow_uuid, history_uuid, history_repo)
-            workflow_manager.remove_container_from_running_list(workflow_uuid, container.id)  
-            container.remove()
-        else:
-            workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
-            workflow_manager.handle_failure(history_uuid, workflow_uuid, history_repo)
-    
-    except ImageNotFound as e:
+        for _ in range(retries+1):
+            start_time = time()
+            container = client.containers.run(image, detach=True, environment=environment)
+            workflow_manager.add_container_to_running_list(workflow_uuid, container.id)
+            while True:
+                if time() - start_time > timeout:
+                    container.remove(force=True)
+                    break
+
+                container.reload()
+                if container.attrs['State']['Status'] in ['exited','dead']:
+                    if container.attrs['State']['ExitCode'] == 0:
+                        if not workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_SUCCESS):
+                            return
+                        workflow_manager.handle_success(job_data, workflow_uuid, history_uuid, history_repo)
+                        workflow_manager.remove_container_from_running_list(workflow_uuid, container.id)
+                        container.remove()
+                        return
+                    else:
+                        workflow_manager.remove_container_from_running_list(workflow_uuid, container.id)
+                        container.remove(force=True)
+                        break
+
         workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
         workflow_manager.handle_failure(history_uuid, workflow_uuid, history_repo)
 
-    except APIError as e:
-        workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
-        workflow_manager.handle_failure(history_uuid, workflow_uuid, history_repo)
-
-    except (ReadTimeout, ConnectionError) as e:
+    except (ReadTimeout, ConnectionError, ImageNotFound, APIError) as e:
         workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
         workflow_manager.handle_failure(history_uuid, workflow_uuid, history_repo)
 

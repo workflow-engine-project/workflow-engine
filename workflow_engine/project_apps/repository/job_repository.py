@@ -4,14 +4,16 @@ from project_apps.models import Job
 
 
 class JobRepository:
-    def create_job(self, workflow_uuid, name, image, parameters, next_job_names, depends_count=0):
+    def create_job(self, workflow_uuid, name, image, parameters, next_job_names, depends_count=0, timeout=0, retries=0):
         job = Job.objects.create(
             workflow_uuid=workflow_uuid,
             name=name,
             image=image,
             parameters=parameters,
             next_job_names=next_job_names,
-            depends_count=depends_count
+            depends_count=depends_count,
+            timeout=timeout,
+            retries=retries
         )
         
         return job
@@ -27,7 +29,7 @@ class JobRepository:
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
 
-    def update_job(self, job_uuid, name, image, parameters, next_job_names, depends_count):
+    def update_job(self, job_uuid, name, image, parameters, next_job_names, depends_count, timeout, retries):
         try:
             job = Job.objects.get(uuid=job_uuid)
 
@@ -57,5 +59,5 @@ class JobRepository:
             return {'status': 'error', 'message': str(e)}
 
     def get_job_list(self, workflow_uuid):
-        job_list = Job.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'name', 'image', 'parameters', 'next_job_names', 'depends_count')
+        job_list = Job.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'name', 'image', 'parameters', 'next_job_names', 'depends_count', 'timeout', 'retries')
         return list(job_list)

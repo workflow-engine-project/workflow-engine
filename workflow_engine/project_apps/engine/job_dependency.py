@@ -1,4 +1,4 @@
-import json
+import orjson as json
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
