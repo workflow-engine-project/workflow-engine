@@ -10,6 +10,8 @@ class Job(models.Model):
     parameters = models.TextField()
     next_job_names = models.TextField()
     depends_count = models.IntegerField()
+    timeout = models.IntegerField(default=0)
+    retries = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('workflow_uuid', 'name')

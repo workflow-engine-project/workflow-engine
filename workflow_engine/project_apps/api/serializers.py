@@ -10,8 +10,10 @@ def serialize_workflow(workflow_info, jobs_data):
             "name": job_data['name'],
             "image": job_data.get('image', ''),
             "parameters": job_data.get('parameters', {}),
+            "next_job_names": job_data.get('next_job_names', []),
             "depends_count": job_data.get('depends_count', 0),
-            "next_job_names": job_data.get('next_job_names', [])
+            "timeout": job_data.get('timeout', 0),
+            "retries": job_data.get('retries', 0)
         }
         serialized_jobs.append(serialized_job)
 
