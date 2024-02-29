@@ -9,11 +9,12 @@ class SchedulingService:
     def __init__(self):
         self.scheduling_repository = SchedulingRepository()
 
-    def create_scheduling(self, workflow_uuid, scheduled_at, interval, is_active):
+    def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count, is_active):
         scheduling = self.scheduling_repository.create_scheduling(
             workflow_uuid=workflow_uuid, 
             scheduled_at=scheduled_at,
             interval=interval,
+            repeat_count=repeat_count,
             is_active=is_active,
         )
   
@@ -24,6 +25,7 @@ class SchedulingService:
             'workflow_uuid': scheduling.workflow_uuid,
             'scheduled_at': scheduling.scheduled_at,
             'interval': scheduling.interval,
+            'repeat_count': scheduling.repeat_count,
             'is_active': scheduling.is_active,
             'created_at': scheduling.created_at,
             'updated_at': scheduling.updated_at
@@ -40,6 +42,7 @@ class SchedulingService:
                 'workflow_uuid': scheduling['workflow_uuid'],
                 'scheduled_at': scheduling['scheduled_at'],
                 'interval': scheduling['interval'],
+                'repeat_count': scheduling['repeat_count'],
                 'is_active': scheduling['is_active'],
                 'created_at': scheduling['created_at'],
                 'updated_at': scheduling['updated_at'],
@@ -53,6 +56,7 @@ class SchedulingService:
             scheduling_uuid,
             scheduled_at=scheduling_data.get('scheduled_at'),
             interval=scheduling_data.get('interval'),
+            repeat_count=scheduling_data.get('repeat_count'),
             is_active=scheduling_data.get('is_active'),
         )
         scheduling_info = {
@@ -60,6 +64,7 @@ class SchedulingService:
             'workflow_uuid': scheduling.workflow_uuid,
             'scheduled_at': scheduling.scheduled_at,
             'interval': scheduling.interval,
+            'repeat_count': scheduling.repeat_count,
             'is_active': scheduling.is_active,
             'created_at': scheduling.created_at,
             'updated_at': scheduling.updated_at,
