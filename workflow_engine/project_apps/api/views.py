@@ -113,15 +113,14 @@ class SchedulingAPIView(APIView):
         workflow_uuid = request.data.get('workflow_uuid')
         scheduled_at = request.data.get('scheduled_at')
         interval = request.data.get('interval')
-        repeat_count = request.data.get('repeat_count')
-        is_active = request.data.get('is_active')
+        repeat_count = request.data.get('repeat_count', 0)
 
         if not workflow_uuid:
             return Response({'error': 'workflow_uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         scheduling_service = SchedulingService()
         try:
-            scheduling = scheduling_service.create_scheduling(workflow_uuid, scheduled_at, interval, repeat_count, is_active)
+            scheduling = scheduling_service.create_scheduling(workflow_uuid, scheduled_at, interval, repeat_count)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

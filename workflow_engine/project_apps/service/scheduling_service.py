@@ -9,13 +9,12 @@ class SchedulingService:
     def __init__(self):
         self.scheduling_repository = SchedulingRepository()
 
-    def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count, is_active):
+    def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count):
         scheduling = self.scheduling_repository.create_scheduling(
             workflow_uuid=workflow_uuid, 
             scheduled_at=scheduled_at,
             interval=interval,
-            repeat_count=repeat_count,
-            is_active=is_active,
+            repeat_count=repeat_count
         )
   
     def get_scheduling(self, scheduling_uuid):

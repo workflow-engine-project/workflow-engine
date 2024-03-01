@@ -1,12 +1,22 @@
+from datetime import timedelta
+
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.utils.dateparse import parse_datetime
 
 from project_apps.models import Scheduling
 
 
 class SchedulingRepository:
-    def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count, is_active):
-        scheduling = Scheduling.objects.create(workflow_uuid=workflow_uuid, scheduled_at=scheduled_at, interval=interval, repeat_count=repeat_count, is_active=is_active)
-        return scheduling
+    def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count):
+        parse_scheduled_at = parse_datetime(scheduled_at) if scheduled_at else None
+        parse_interval = timedelta(**interval) if interval else None
+
+        scheduling = Scheduling.objects.create(
+            workflow_uuid=workflow_uuid, 
+            scheduled_at=parse_scheduled_at, 
+            interval=parse_interval, 
+            repeat_count=repeat_count
+        )
     
     def get_scheduling(self, scheduling_uuid):
         try:
