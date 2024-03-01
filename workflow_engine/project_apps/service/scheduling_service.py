@@ -1,7 +1,9 @@
 import orjson as json
 
 from django.db import transaction
+from django.utils import timezone
 
+from project_apps.engine.scheduling_execute import execute_scheduling
 from project_apps.repository.scheduling_repository import SchedulingRepository
 
 
@@ -78,3 +80,23 @@ class SchedulingService:
 
         # scheduling 삭제
         self.scheduling_repository.delete_scheduling(scheduling.uuid)
+    
+    def activate_scheduling(self, scheduling_uuid):
+        scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
+
+        if scheduling.is_active:
+            return False, "스케줄링이 이미 활성화되어있습니다"
+            
+        if scheduling.scheduled_at and scheduling.scheduled_at < timezone.now():
+            return False, "스케줄링 예정된 시간이 지났습니다."
+            
+        scheduling.is_active = True
+        scheduling.save()
+
+        if scheduling.scheduled_at:
+            delay = (scheduling.scheduled_at - timezone.now()).total_seconds()
+            execute_scheduling.apply_async((scheduling_uuid,), countdown=delay)
+        else:
+            execute_scheduling.delay(scheduling_uuid)
+
+        return True, "스케줄링이 활성화되었습니다. 예정된 시간에 실행됩니다."
