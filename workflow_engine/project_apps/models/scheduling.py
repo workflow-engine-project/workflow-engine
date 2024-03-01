@@ -8,6 +8,6 @@ class Scheduling(models.Model):
     scheduled_at = models.DateTimeField(null=True)
     interval = models.DurationField(null=True)
     repeat_count = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
