@@ -50,4 +50,4 @@ class WorkflowRepository:
 
     def get_workflow_list(self):
         workflow_list = Workflow.objects.all()
-        return list(workflow_list.values())
+        return workflow_list
