@@ -70,12 +70,16 @@ class WorkflowAPIView(APIView):
 
         try:
             # Workflow 및 해당 Workflow에 종속된 Jobs를 삭제
-            workflow_service.delete_workflow(workflow_uuid)
+            result = workflow_service.delete_workflow(workflow_uuid)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'success': f'Workflow with uuid {workflow_uuid} and associated jobs deleted successfully.'},
-                        status=status.HTTP_204_NO_CONTENT)
+        if result:
+            return Response({'success': f'Workflow with uuid {workflow_uuid} and associated jobs deleted successfully.'},
+                            status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'fail': f'Workflow with uuid {workflow_uuid} and associated jobs does not exist.'},
+                            status=status.HTTP_404_NOT_FOUND)
 
 
 class WorkflowListReadAPIView(APIView):

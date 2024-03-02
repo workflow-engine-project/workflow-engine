@@ -86,6 +86,10 @@ class WorkflowService:
     @transaction.atomic
     def delete_workflow(self, workflow_uuid):
         workflow = self.workflow_repository.get_workflow(workflow_uuid)
+
+        if isinstance(workflow, dict):
+            return False
+
         jobs = self.job_repository.get_job_list(workflow_uuid)
 
         # Workflow 삭제
@@ -94,6 +98,8 @@ class WorkflowService:
         # Jobs 삭제
         for job in jobs:
             self.job_repository.delete_job(job.uuid)
+
+        return True
 
     def get_workflow_list(self):
         workflows = self.workflow_repository.get_workflow_list()
