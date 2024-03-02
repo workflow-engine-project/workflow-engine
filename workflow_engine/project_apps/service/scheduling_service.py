@@ -18,7 +18,7 @@ class SchedulingService:
             interval=interval,
             repeat_count=repeat_count
         )
-  
+
     def get_scheduling(self, scheduling_uuid):
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
         scheduling_info = {
