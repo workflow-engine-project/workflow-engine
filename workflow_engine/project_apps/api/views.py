@@ -182,3 +182,17 @@ class SchedulingListReadAPIView(APIView):
         scheduling_list = scheduling_service.get_scheduling_list(workflow_uuid)
 
         return Response(scheduling_list, status=status.HTTP_200_OK)
+
+
+class SchedulingExecuteAPIView(APIView):
+    '''
+    API View for execute scheduling. 
+    '''
+    def post(self, request, scheduling_uuid):
+        scheduling_service = SchedulingService()
+        success, message = scheduling_service.activate_scheduling(scheduling_uuid)
+
+        if not success:
+            return Response({"error": message}, status=400)
+
+        return Response({"message": message})
