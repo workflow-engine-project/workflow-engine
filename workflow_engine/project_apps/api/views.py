@@ -47,8 +47,8 @@ class WorkflowAPIView(APIView):
     API View for updating the corresponding workflow record.
     '''
     def patch(self, request, workflow_uuid):
-        workflow_data = request.data.dict()
-        jobs_data = workflow_data.pop('jobs')
+        workflow_data = request.data
+        jobs_data = workflow_data.get('jobs', {})
 
         if not workflow_uuid:
             return Response({'error': 'workflow uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
