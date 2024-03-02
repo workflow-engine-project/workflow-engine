@@ -33,7 +33,7 @@ class WorkflowService:
                     depends_count[next_job_name] += 1
 
         # 작업 정보 생성 및 추가
-        jobs_info = []
+        jobs = []
         for job_data in jobs_data:
             job = self.job_repository.create_job(
                 workflow_uuid=workflow.uuid,
@@ -46,57 +46,17 @@ class WorkflowService:
                 retries=job_data.get('retries', 0)
             )
 
-            jobs_info.append({
-            'uuid': job.uuid,
-            'name': job.name,
-            'image': job.image,
-            'parameters': job.parameters,
-            'next_job_names': job.next_job_names,
-            'depends_count': job.depends_count,
-            'timeout': job.timeout,
-            'retries': job.retries
-            })
-        
-        # 워크플로우 정보 생성
-        workflow_info = {
-            'uuid': workflow.uuid,
-            'name': workflow.name,
-            'description': workflow.description
-        }
-        
-        # 워크플로우와 작업 목록을 함께 직렬화
-        serialized_workflow = serialize_workflow(workflow_info, jobs_info)
+            jobs.append(job)
 
-        return serialized_workflow
-            
+        # 워크플로우와 작업 목록을 함께 직렬화
+        return serialize_workflow(workflow, jobs)
+
     def get_workflow(self, workflow_uuid):
         workflow = self.workflow_repository.get_workflow(workflow_uuid)
-        workflow_info = {
-            'uuid': workflow.uuid,
-            'name': workflow.name,
-            'description': workflow.description,
-            'created_at': workflow.created_at,
-            'updated_at': workflow.updated_at
-        }
 
         jobs = self.job_repository.get_job_list(workflow_uuid)
-        jobs_info = []
-        for job in jobs:
-            jobs_info.append({
-                'uuid': job['uuid'],  # 수정 부분임!
-                # 'workflow_uuid': job['workflow_uuid'],
-                'name': job['name'],
-                'image': job['image'],
-                'parameters': job['parameters'],
-                'next_job_names': job['next_job_names'],
-                'depends_count': job['depends_count'],
-                'timeout': job['timeout'],
-                'retries': job['retries']
-            })
 
-        workflow_info['jobs'] = jobs_info
-
-        return workflow_info
+        return serialize_workflow(workflow, jobs)
 
     @transaction.atomic
     def update_workflow(self, workflow_uuid, workflow_data, jobs_data):
@@ -105,15 +65,8 @@ class WorkflowService:
             name=workflow_data.get('name'),
             description=workflow_data.get('description')
         )
-        workflow_info = {
-            'uuid': workflow.uuid,
-            'name': workflow.name,
-            'description': workflow.description,
-            'created_at': workflow.created_at,
-            'updated_at': workflow.updated_at
-        }
 
-        jobs_info = []
+        jobs = []
         for job_data in jobs_data:
             job = self.job_repository.update_job(
                 job_uuid=job_data.get('uuid'),
@@ -125,21 +78,10 @@ class WorkflowService:
                 timeout=job_data.get('timeout'),
                 retries=job_data.get('retries')
             )
-            jobs_info.append({
-                'uuid': job.uuid,
-                # 'workflow_uuid': job.workflow_uuid,
-                'name': job.name,
-                'image': job.image,
-                'parameters': job.parameters,
-                'next_job_names': job.next_job_names,
-                'depends_count': job.depends_count,
-                'timeout': job.timeout,
-                'retries': job.retries
-            })
+            
+            jobs.append(job)
 
-        workflow_info['jobs'] = jobs_info
-
-        return workflow_info
+        return serialize_workflow(workflow, jobs)
 
     @transaction.atomic
     def delete_workflow(self, workflow_uuid):
@@ -151,39 +93,15 @@ class WorkflowService:
 
         # Jobs 삭제
         for job in jobs:
-            self.job_repository.delete_job(job['uuid'])
+            self.job_repository.delete_job(job.uuid)
 
     def get_workflow_list(self):
         workflows = self.workflow_repository.get_workflow_list()
         workflows_info = []
         for workflow in workflows:
-            workflow_info = {
-                'uuid': workflow['uuid'],
-                'name': workflow['name'],
-                'description': workflow['description'],
-                'created_at': workflow['created_at'],
-                'updated_at': workflow['updated_at']
-            }
-
-            jobs = self.job_repository.get_job_list(workflow['uuid'])
-            jobs_info = []
-            for job in jobs:
-                print(job)
-                jobs_info.append({
-                    'uuid': job['uuid'],
-                    # 'workflow_uuid': job['workflow_uuid'],
-                    'name': job['name'],
-                    'image': job['image'],
-                    'parameters': job['parameters'],
-                    'next_job_names': job['next_job_names'],
-                    'depends_count': job['depends_count'],
-                    'timeout': job['timeout'],
-                    'retries': job['retries']
-                })
-            
-            workflow_info['jobs'] = jobs_info
-
-            workflows_info.append(workflow_info)
+            jobs = self.job_repository.get_job_list(workflow.uuid)
+            serialized_workflow = serialize_workflow(workflow, jobs)
+            workflows_info.append(serialized_workflow)
 
         return workflows_info
     
@@ -193,13 +111,13 @@ class WorkflowService:
         self.cache.delete(f"{workflow_uuid}_status")  
         self.cache.delete(f"{workflow_uuid}_running_containers")
 
-        job_list = self.job_repository.get_job_list(workflow_uuid)
+        job_list = self.job_repository.get_job_list(workflow_uuid).values()
         for job in job_list:
             job['result'] = JOB_STATUS_WAITING
             job['uuid'] = str(job['uuid'])
 
         if job_list:
-            job_list_json = json.dumps(job_list)
+            job_list_json = json.dumps(list(job_list))
             self.cache.set(workflow_uuid, job_list_json)            
             self.cache.set(f"{workflow_uuid}_status", WORKFLOW_STATUS_RUNNING)
             self.cache.set(f"{workflow_uuid}_running_containers", [])
