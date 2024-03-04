@@ -74,7 +74,7 @@ class WorkflowManager:
         return self.cache.get(f"{workflow_uuid}_status")
 
     @with_lock
-    def handle_success(self, job_data, workflow_uuid, history_uuid, history_repo):
+    def handle_success(self, job_data, workflow_uuid, history_uuid):
         '''
         성공한 작업을 처리하고, 해당 작업에 의존하는 다음 작업들의 상태를 업데이트.
         '''
@@ -95,17 +95,17 @@ class WorkflowManager:
             self.cache.set(workflow_uuid, json.dumps(workflow_data))
             job_dependency(workflow_uuid, history_uuid)
 
-        self.check_workflow_completion(workflow_uuid, history_uuid, history_repo)
+        self.check_workflow_completion(workflow_uuid, history_uuid)
 
-    def handle_failure(self, history_uuid, workflow_uuid, history_repo):
+    def handle_failure(self, workflow_uuid, history_uuid):
         '''
         작업 실행 실패 시 처리 로직을 수행.
         워크플로우 실패 상태를 설정하고, 관련 히스토리를 업데이트.
         '''
         self.update_workflow_status(workflow_uuid, WORKFLOW_STATUS_FAIL)
-        history_repo.update_history_status(history_uuid, HISTORY_STATUS_FAIL)
+        self.history_repository.update_history_status(history_uuid, HISTORY_STATUS_FAIL)
 
-    def check_workflow_completion(self, workflow_uuid, history_uuid, history_repo):
+    def check_workflow_completion(self, workflow_uuid, history_uuid):
         '''
         워크플로우의 모든 작업(job)이 성공적으로 완료되었는지 확인.
         모든 작업이 성공적으로 완료되면, 히스토리 상태를 업데이트하고 워크플로우 데이터를 캐시에서 삭제.
@@ -119,7 +119,7 @@ class WorkflowManager:
 
         if completed:
             self.update_workflow_status(workflow_uuid, WORKFLOW_STATUS_SUCCESS)
-            history_repo.update_history_status(history_uuid, HISTORY_STATUS_SUCCESS)
+            self.history_repository.update_history_status(history_uuid, HISTORY_STATUS_SUCCESS)
 
     @with_lock
     def add_container_to_running_list(self, workflow_uuid, container_id):
