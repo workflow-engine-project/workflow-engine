@@ -59,9 +59,7 @@ def job_execute(workflow_uuid, history_uuid, job_uuid):
             return False
 
     except (ReadTimeout, ConnectionError, ImageNotFound, APIError) as e:
-        workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
-        workflow_manager.handle_failure(workflow_uuid, history_uuid)
+        return False
 
     except Exception as e:
-        workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
-        workflow_manager.handle_failure(workflow_uuid, history_uuid)
+        return False
