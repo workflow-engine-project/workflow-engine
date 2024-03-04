@@ -3,6 +3,7 @@ import orjson as json
 from django.db import transaction
 from django.utils import timezone
 
+from project_apps.api.serializers import serialize_scheduling
 from project_apps.engine.scheduling_execute import execute_scheduling
 from project_apps.repository.scheduling_repository import SchedulingRepository
 
@@ -19,6 +20,8 @@ class SchedulingService:
             repeat_count=repeat_count
         )
 
+        return serialize_scheduling(scheduling)
+
     def get_scheduling(self, scheduling_uuid):
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
         scheduling_info = {
@@ -32,7 +35,7 @@ class SchedulingService:
             'updated_at': scheduling.updated_at
         }
 
-        return scheduling_info
+        return serialize_scheduling(scheduling)
 
     def get_scheduling_list(self, workflow_uuid):
         schedulings = self.scheduling_repository.get_scheduling_list(workflow_uuid)
@@ -71,7 +74,7 @@ class SchedulingService:
             'updated_at': scheduling.updated_at,
         }
 
-        return scheduling_info
+        return serialize_scheduling(scheduling)
 
     @transaction.atomic
     def delete_scheduling(self, scheduling_uuid):
