@@ -76,6 +76,13 @@ class WorkflowService:
             description=workflow_data.get('description')
         )
 
+        # 의존성 카운트 계산
+        depends_count = {job_data['name']: 0 for job_data in jobs_data}
+        for job_data in jobs_data:
+            for next_job_name in job_data.get('next_job_names', []):
+                if next_job_name in depends_count:
+                    depends_count[next_job_name] += 1
+
         jobs = []
         for job_data in jobs_data:
             job = self.job_repository.update_job(
@@ -84,7 +91,7 @@ class WorkflowService:
                 image=job_data.get('image'),
                 parameters=job_data.get('parameters'),
                 next_job_names=job_data.get('next_job_names'),
-                depends_count=job_data.get('depends_count'),
+                depends_count=depends_count[job_data['name']],
                 timeout=job_data.get('timeout'),
                 retries=job_data.get('retries')
             )
