@@ -17,6 +17,7 @@ class SchedulingRepository:
             interval=parse_interval, 
             repeat_count=repeat_count
         )
+        return scheduling
     
     def get_scheduling(self, scheduling_uuid):
         try:
@@ -33,13 +34,14 @@ class SchedulingRepository:
         scheduling_list = Scheduling.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'workflow_uuid', 'scheduled_at', 'interval', 'is_active', 'created_at', 'updated_at')
         return list(scheduling_list.values())
 
-    def update_scheduling(self, scheduling_uuid, scheduled_at, interval, repeat_count, is_active):
+    def update_scheduling(self, scheduling_uuid, scheduled_at, interval, repeat_count):
         try:
             scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
             
-            for arg, val in locals().items():
-                if val is not None:
-                    setattr(scheduling, arg, val)
+            scheduling.scheduled_at = parse_datetime(scheduled_at) if scheduled_at else scheduling.scheduled_at
+            scheduling.interval = timedelta(**interval) if interval else scheduling.interval
+            scheduling.repeat_count = repeat_count if repeat_count else scheduling.repeat_count
+
             scheduling.save()
 
             return scheduling

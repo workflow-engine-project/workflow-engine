@@ -18,6 +18,18 @@ class SchedulingService:
             interval=interval,
             repeat_count=repeat_count
         )
+        scheduling_info = {
+            'uuid': scheduling.uuid,
+            'workflow_uuid': scheduling.workflow_uuid,
+            'scheduled_at': scheduling.scheduled_at,
+            'interval': scheduling.interval,
+            'repeat_count': scheduling.repeat_count,
+            'is_active': scheduling.is_active,
+            'created_at': scheduling.created_at,
+            'updated_at': scheduling.updated_at
+        }
+
+        return scheduling_info
 
     def get_scheduling(self, scheduling_uuid):
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
@@ -58,7 +70,6 @@ class SchedulingService:
             scheduled_at=scheduling_data.get('scheduled_at'),
             interval=scheduling_data.get('interval'),
             repeat_count=scheduling_data.get('repeat_count'),
-            is_active=scheduling_data.get('is_active'),
         )
         scheduling_info = {
             'uuid': scheduling.uuid,

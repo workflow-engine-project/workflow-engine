@@ -23,9 +23,9 @@ class JobRepository:
             job = Job.objects.get(uuid=job_uuid)
             return job
         except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Workflow not found'}
+            return {'status': 'error', 'message': 'Job not found'}
         except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+            return {'status': 'error', 'message': 'Multiple Jobs found with the same UUID'}
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
 
@@ -40,9 +40,9 @@ class JobRepository:
 
             return job
         except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Workflow not found'}
+            return {'status': 'error', 'message': 'Job not found'}
         except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+            return {'status': 'error', 'message': 'Multiple Jobs found with the same UUID'}
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
 
