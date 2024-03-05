@@ -21,6 +21,7 @@ services:
     command: celery -A workflow_engine worker -l info
     volumes:
       - ./workflow_engine:/app
+      - /var/run/docker.sock:/var/run/docker.sock # Docker 소켓 마운트 추가
     environment:
       CELERY_BROKER_URL: $CELERY_BROKER_URL
       CELERY_RESULT_BACKEND: $CELERY_RESULT_BACKEND
