@@ -1,5 +1,4 @@
 import orjson as json
-
 from django.db import transaction
 
 from project_apps.api.serializers import serialize_workflow
@@ -13,6 +12,9 @@ from project_apps.service.lock_utils import with_lock
 
 
 class WorkflowService:
+    '''
+    Workflow 정보를 관리하는 서비스.
+    '''
     def __init__(self):
         self.workflow_repository = WorkflowRepository()
         self.job_repository = JobRepository()
@@ -20,19 +22,21 @@ class WorkflowService:
         self.cache = Cache()
 
     def create_workflow(self, name, description, jobs_data):
+        '''
+        입력 받은 데이터를 바탕으로 의존성 카운트를 계산하고, 
+        Workflow와 Job 리스트를 생성하고 그 결과를 반환한다.
+        '''
         workflow = self.workflow_repository.create_workflow(
             name=name, 
             description=description
         )
 
-        # 의존성 카운트 계산
         depends_count = {job_data['name']: 0 for job_data in jobs_data}
         for job_data in jobs_data:
             for next_job_name in job_data.get('next_job_names', []):
                 if next_job_name in depends_count:
                     depends_count[next_job_name] += 1
 
-        # 작업 정보 생성 및 추가
         jobs = []
         for job_data in jobs_data:
             job = self.job_repository.create_job(
@@ -48,10 +52,12 @@ class WorkflowService:
 
             jobs.append(job)
 
-        # 워크플로우와 작업 목록을 함께 직렬화
         return serialize_workflow(workflow, jobs)
 
     def get_workflow(self, workflow_uuid):
+        '''
+        입력 받은 Workflow와 그에 포함된 Job 리스트를 반환한다.
+        '''
         workflow = self.workflow_repository.get_workflow(workflow_uuid)
 
         jobs = self.job_repository.get_job_list(workflow_uuid)
@@ -60,6 +66,10 @@ class WorkflowService:
 
     @transaction.atomic
     def update_workflow(self, workflow_uuid, workflow_data, jobs_data):
+        '''
+        입력 받은 Workflow와 Job 리스트를 주어진 데이터로 수정하고, 
+        그 결과를 반환한다.
+        '''
         workflow = self.workflow_repository.update_workflow(
             workflow_uuid=workflow_uuid,
             name=workflow_data.get('name'),
@@ -85,6 +95,9 @@ class WorkflowService:
 
     @transaction.atomic
     def delete_workflow(self, workflow_uuid):
+        '''
+        입력 받은 Workflow와 Job 리스트를 삭제한다.
+        '''
         workflow = self.workflow_repository.get_workflow(workflow_uuid)
 
         if isinstance(workflow, dict):
@@ -92,16 +105,17 @@ class WorkflowService:
 
         jobs = self.job_repository.get_job_list(workflow_uuid)
 
-        # Workflow 삭제
         self.workflow_repository.delete_workflow(workflow.uuid)
 
-        # Jobs 삭제
         for job in jobs:
             self.job_repository.delete_job(job.uuid)
 
         return True
 
     def get_workflow_list(self):
+        '''
+        모든 Workflow의 정보와 각각의 Job 리스트를 반환한다.
+        '''
         workflows = self.workflow_repository.get_workflow_list()
         workflows_info = []
         for workflow in workflows:
@@ -111,10 +125,14 @@ class WorkflowService:
 
         return workflows_info
     
-    @with_lock    
+    @with_lock
     def execute_workflow(self, workflow_uuid):
-        self.cache.delete(f"{workflow_uuid}")  
-        self.cache.delete(f"{workflow_uuid}_status")  
+        '''
+        실행 요청을 받은 Workflow를 캐싱, 실행 History 생성 
+        및 Job 의존성을 계산하여 Workflow 실행을 준비한다.
+        '''
+        self.cache.delete(f"{workflow_uuid}")
+        self.cache.delete(f"{workflow_uuid}_status")
         self.cache.delete(f"{workflow_uuid}_running_containers")
 
         job_list = self.job_repository.get_job_list(workflow_uuid).values()
@@ -134,4 +152,3 @@ class WorkflowService:
             return True
         else:
             return False
-            

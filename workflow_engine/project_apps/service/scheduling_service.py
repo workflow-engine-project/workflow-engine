@@ -1,5 +1,3 @@
-import orjson as json
-
 from django.db import transaction
 from django.utils import timezone
 
@@ -9,10 +7,16 @@ from project_apps.repository.scheduling_repository import SchedulingRepository
 
 
 class SchedulingService:
+    '''
+    Scheduling 정보를 관리하는 서비스.
+    '''
     def __init__(self):
         self.scheduling_repository = SchedulingRepository()
 
     def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count):
+        '''
+        입력 받은 데이터를 바탕으로 Scheduling을 생성한다.
+        '''
         scheduling = self.scheduling_repository.create_scheduling(
             workflow_uuid=workflow_uuid, 
             scheduled_at=scheduled_at,
@@ -35,6 +39,9 @@ class SchedulingService:
         return serialize_scheduling(scheduling)
 
     def get_scheduling(self, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 반환한다.
+        '''
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
         scheduling_info = {
             'uuid': scheduling.uuid,
@@ -50,6 +57,9 @@ class SchedulingService:
         return serialize_scheduling(scheduling)
 
     def get_scheduling_list(self, workflow_uuid):
+        '''
+        모든 Scheduling의 정보를 반환한다.
+        '''
         schedulings = self.scheduling_repository.get_scheduling_list(workflow_uuid)
         schedulings_info = []
         for scheduling in schedulings:
@@ -68,6 +78,9 @@ class SchedulingService:
 
     @transaction.atomic
     def update_scheduling(self, scheduling_uuid, scheduling_data):
+        '''
+        입력 받은 Scheduling을 전송 받은 데이터로 수정한다.
+        '''
         scheduling = self.scheduling_repository.update_scheduling(
             scheduling_uuid,
             scheduled_at=scheduling_data.get('scheduled_at'),
@@ -89,12 +102,17 @@ class SchedulingService:
 
     @transaction.atomic
     def delete_scheduling(self, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 삭제한다.
+        '''
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
 
-        # scheduling 삭제
         self.scheduling_repository.delete_scheduling(scheduling.uuid)
     
     def activate_scheduling(self, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 활성화한다.
+        '''
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
 
         if scheduling.is_active:

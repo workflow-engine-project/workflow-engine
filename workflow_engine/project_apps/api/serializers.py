@@ -1,6 +1,6 @@
 def serialize_workflow(workflow_info, jobs_data):
     '''
-    workflow 해당 workflow 속한 job 데이터 직렬화
+    입력받은 Workflow와 Job 모델 객체를 직렬화한다.
     '''
     serialized_jobs = []
     for job_data in jobs_data:

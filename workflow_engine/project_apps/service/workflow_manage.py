@@ -11,7 +11,7 @@ from project_apps.service.lock_utils import with_lock
 
 class WorkflowManager:
     '''
-    워크플로우 실행을 관리하는 서비스.
+    Workflow 실행을 관리하는 서비스.
     '''
     def __init__(self):
         self.job_repository = JobRepository()
@@ -20,8 +20,8 @@ class WorkflowManager:
         
     def find_job_data(self, workflow_uuid, job_uuid):
         '''
-        주어진 워크플로우 데이터에서 특정 작업(job)을 찾아 반환.
-        찾는 작업이 없으면 None 반환.
+        주어진 Workflow 데이터에서 특정 Job을 찾아 반환하고, 
+        찾는 Job이 없다면 None을 반환한다.
         '''
         workflow_data = json.loads(self.cache.get(workflow_uuid))
         for job in workflow_data:
@@ -32,7 +32,7 @@ class WorkflowManager:
     @with_lock
     def update_job_status(self, workflow_uuid, job_uuid, status):
         '''
-        특정 작업의 상태를 업데이트하고, 변경된 워크플로우 데이터를 캐시에 저장.
+        특정 Job의 상태를 갱신하고, 변경된 Workflow 데이터를 캐시에 저장한다.
         '''
         workflow_data = json.loads(self.cache.get(workflow_uuid))
 
@@ -57,8 +57,8 @@ class WorkflowManager:
     @with_lock
     def update_workflow_status(self, workflow_uuid, status):
         '''
-        워크플로우의 상태를 업데이트. 만약 상태가 실패로 업데이트된 경우, 
-		실행 중인 모든 도커 컨테이너를 종료
+        Workflow의 상태를 갱신한다. 만약 상태가 실패로 갱신된 경우, 
+		실행 중인 모든 도커 컨테이너를 종료한다.
         '''
         self.cache.set(f"{workflow_uuid}_status", status)
         if status == WORKFLOW_STATUS_FAIL:
@@ -69,14 +69,14 @@ class WorkflowManager:
     
     def check_workflow_status(self, workflow_uuid):
         '''
-        워크플로우의 상태를 확인.
+        Workflow의 상태를 확인한다.
         '''
         return self.cache.get(f"{workflow_uuid}_status")
 
     @with_lock
     def handle_success(self, job_data, workflow_uuid, history_uuid):
         '''
-        성공한 작업을 처리하고, 해당 작업에 의존하는 다음 작업들의 상태를 업데이트.
+        성공한 Job을 처리하고, 해당 Job에 의존하는 다음 Job들의 상태를 갱신한다.
         '''
         updated = False 
 
@@ -99,16 +99,16 @@ class WorkflowManager:
 
     def handle_failure(self, workflow_uuid, history_uuid):
         '''
-        작업 실행 실패 시 처리 로직을 수행.
-        워크플로우 실패 상태를 설정하고, 관련 히스토리를 업데이트.
+        실패한 Job을 처리한다.
+        Workflow 실패 상태를 설정하고, 실행 History를 갱신한다.
         '''
         self.update_workflow_status(workflow_uuid, WORKFLOW_STATUS_FAIL)
         self.history_repository.update_history_status(history_uuid, HISTORY_STATUS_FAIL)
 
     def check_workflow_completion(self, workflow_uuid, history_uuid):
         '''
-        워크플로우의 모든 작업(job)이 성공적으로 완료되었는지 확인.
-        모든 작업이 성공적으로 완료되면, 히스토리 상태를 업데이트하고 워크플로우 데이터를 캐시에서 삭제.
+        Workflow의 모든 Job이 성공적으로 완료되었는지 확인한다.
+        모든 Job이 성공적으로 완료되면, History 상태를 갱신하고 Workflow 데이터를 캐시에서 삭제한다.
         '''
         workflow_data = json.loads(self.cache.get(workflow_uuid))
         completed = True
@@ -124,7 +124,7 @@ class WorkflowManager:
     @with_lock
     def add_container_to_running_list(self, workflow_uuid, container_id):
         '''
-        실행 중인 도커 컨테이너의 ID를 워크플로우의 실행중인 컨테이너 목록에 추가.
+        실행 중인 도커 컨테이너의 ID를 Workflow의 실행중인 컨테이너 목록에 추가한다.
         '''
         running_containers = self.cache.get(f"{workflow_uuid}_running_containers")
         running_containers.append(container_id)
@@ -133,7 +133,7 @@ class WorkflowManager:
     @with_lock
     def remove_container_from_running_list(self, workflow_uuid, container_id):
         '''
-        워크플로우의 실행 중인 컨테이너 목록에서 특정 컨테이너의 ID를 제거.
+        Workflow의 실행 중인 컨테이너 목록에서 특정 컨테이너의 ID를 제거한다.
         '''
         running_containers = self.cache.get(f"{workflow_uuid}_running_containers")
         if container_id in running_containers:

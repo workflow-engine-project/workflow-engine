@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,9 +9,12 @@ from project_apps.service.scheduling_service import SchedulingService
 
 class WorkflowAPIView(APIView):
     '''
-    API View for creating a new Workflow instance along with associated Job instances.
+    Workflow 정보를 관리하는 API.
     '''
     def post(self, request):
+        '''
+        입력 받은 데이터를 바탕으로 Workflow와 Job 리스트를 생성한다.
+        '''
         name = request.data.get('name')
         description = request.data.get('description')
         jobs_data = request.data.get('jobs', [])
@@ -28,10 +30,10 @@ class WorkflowAPIView(APIView):
         
         return Response(workflow, status=status.HTTP_201_CREATED)
 
-    '''
-    API View for reading the corresponding workflow record.
-    '''
     def get(self, request, workflow_uuid):
+        '''
+        입력 받은 Workflow와 그에 포함된 Job 리스트를 반환한다.
+        '''
         if not workflow_uuid:
             return Response({'error': 'workflow uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -43,10 +45,10 @@ class WorkflowAPIView(APIView):
         
         return Response(workflow, status=status.HTTP_200_OK)
 
-    '''
-    API View for updating the corresponding workflow record.
-    '''
     def patch(self, request, workflow_uuid):
+        '''
+        입력 받은 Workflow와 Job 리스트를 주어진 데이터로 수정한다.
+        '''
         workflow_data = request.data
         jobs_data = workflow_data.get('jobs', {})
 
@@ -61,15 +63,13 @@ class WorkflowAPIView(APIView):
 
         return Response(workflow, status=status.HTTP_200_OK)
 
-    '''
-    API View for deleting a Workflow instance along with associated Job instances.
-    '''
-
     def delete(self, request, workflow_uuid):
+        '''
+        입력 받은 Workflow와 Job 리스트를 삭제한다.
+        '''
         workflow_service = WorkflowService()
 
         try:
-            # Workflow 및 해당 Workflow에 종속된 Jobs를 삭제
             result = workflow_service.delete_workflow(workflow_uuid)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -84,9 +84,12 @@ class WorkflowAPIView(APIView):
 
 class WorkflowListReadAPIView(APIView):
     '''
-    API View for reading the whole workflow list.
+    모든 Workflow의 정보와 각각의 Job 리스트를 반환하는 API.
     '''
     def get(self, request):
+        '''
+        모든 Workflow의 리스트를 반환한다.
+        '''
         workflow_service = WorkflowService()
         workflow_list = workflow_service.get_workflow_list()
         
@@ -94,12 +97,12 @@ class WorkflowListReadAPIView(APIView):
 
 
 class WorkflowExecuteAPIView(APIView):
+    '''
+    Workflow를 실행하는 API.
+    '''
     def get(self, request, workflow_uuid):
         '''
-        Fetch the list of jobs to execute, belonging to the corresponding workflow uuid and cache it into Redis storage.
-
-        Request data
-        - uuid: workflow's uuid that you want to execute.
+        입력 받은 Workflow를 수행한다.
         '''
         workflow_service = WorkflowService()
         result = workflow_service.execute_workflow(workflow_uuid)
@@ -112,9 +115,12 @@ class WorkflowExecuteAPIView(APIView):
 
 class SchedulingAPIView(APIView):
     '''
-    API View for creating a new Scheduling instance.
+    Scheduling 정보를 관리하는 API.
     '''
     def post(self, request):
+        '''
+        입력 받은 데이터를 바탕으로 Scheduling을 생성한다.
+        '''
         workflow_uuid = request.data.get('workflow_uuid')
         scheduled_at = request.data.get('scheduled_at')
         interval = request.data.get('interval')
@@ -131,10 +137,10 @@ class SchedulingAPIView(APIView):
 
         return Response(scheduling, status=status.HTTP_201_CREATED)
 
-    '''
-    API View for reading the corresponding scheduling record.
-    '''
     def get(self, request, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 반환한다.
+        '''
         if not scheduling_uuid:
             return Response({'error': 'scheduling uuid is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -146,10 +152,10 @@ class SchedulingAPIView(APIView):
 
         return Response(scheduling, status=status.HTTP_200_OK)
 
-    '''
-    API View for updating the corresponding scheduling record.
-    '''
     def patch(self, request, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 전송 받은 데이터로 수정한다.
+        '''
         scheduling_data = request.data
 
         if not scheduling_uuid:
@@ -163,10 +169,10 @@ class SchedulingAPIView(APIView):
 
         return Response(scheduling, status=status.HTTP_200_OK)
 
-    '''
-    API View for deleting a scheduling instance.
-    '''
     def delete(self, request, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 삭제한다.
+        '''
         scheduling_service = SchedulingService()
 
         try:
@@ -180,9 +186,12 @@ class SchedulingAPIView(APIView):
 
 class SchedulingListReadAPIView(APIView):
     '''
-    API View for reading the whole scheduling list.
+    모든 Scheduling의 정보와 각각의 Job 리스트를 반환하는 API.
     '''
     def get(self, request, workflow_uuid):
+        '''
+        모든 Scheduling의 리스트를 반환한다.
+        '''
         scheduling_service = SchedulingService()
         scheduling_list = scheduling_service.get_scheduling_list(workflow_uuid)
 
@@ -191,9 +200,12 @@ class SchedulingListReadAPIView(APIView):
 
 class SchedulingExecuteAPIView(APIView):
     '''
-    API View for execute scheduling. 
+    Scheduling을 활성화하는 API.
     '''
     def post(self, request, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 활성화한다.
+        '''
         scheduling_service = SchedulingService()
         success, message = scheduling_service.activate_scheduling(scheduling_uuid)
 
