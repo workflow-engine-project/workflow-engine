@@ -1,7 +1,10 @@
 import redis
+
+from django.conf import settings
+
 from functools import wraps
 
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_client = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
 def with_lock(func):
     @wraps(func)
