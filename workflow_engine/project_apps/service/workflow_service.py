@@ -26,6 +26,14 @@ class WorkflowService:
         입력 받은 데이터를 바탕으로 의존성 카운트를 계산하고, 
         Workflow와 Job 리스트를 생성하고 그 결과를 반환한다.
         '''
+        # 의존성이 걸린 작업의 실존 여부 판별
+        jobs_name = [job_data['name'] for job_data in jobs_data]
+
+        for job_data in jobs_data:
+            for next_job_name in job_data.get('next_job_names', []):
+                if next_job_name not in jobs_name:
+                    return {'status': 'error', 'message': f"Job '{next_job_name}' referenced in next_job_names does not exist"}
+
         workflow = self.workflow_repository.create_workflow(
             name=name, 
             description=description
@@ -70,6 +78,16 @@ class WorkflowService:
         입력 받은 Workflow와 Job 리스트를 주어진 데이터로 수정하고, 
         그 결과를 반환한다.
         '''
+        jobs = self.job_repository.get_job_list(workflow_uuid)
+
+        # 의존성이 걸린 작업의 실존 여부 판별
+        jobs_name = [job.name for job in jobs]
+
+        for job_data in jobs_data:
+            for next_job_name in job_data.get('next_job_names', []):
+                if next_job_name not in jobs_name:
+                    return {'status': 'error', 'message': f"Job '{next_job_name}' referenced in next_job_names does not exist"}
+
         workflow = self.workflow_repository.update_workflow(
             workflow_uuid=workflow_uuid,
             name=workflow_data.get('name'),
