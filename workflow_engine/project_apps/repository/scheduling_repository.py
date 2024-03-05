@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.dateparse import parse_datetime
 
-from project_apps.models import Scheduling
+from project_apps.models import Scheduling, Workflow
 
 
 class SchedulingRepository:
@@ -14,17 +14,26 @@ class SchedulingRepository:
         '''
         Scheduling 정보를 생성한다.
         '''
-        parse_scheduled_at = parse_datetime(scheduled_at) if scheduled_at else None
-        parse_interval = timedelta(**interval) if interval else None
+        try:
+            workflow = Workflow.objects.get(uuid=workflow_uuid)
 
-        scheduling = Scheduling.objects.create(
-            workflow_uuid=workflow_uuid, 
-            scheduled_at=parse_scheduled_at, 
-            interval=parse_interval, 
-            repeat_count=repeat_count
-        )
-        return scheduling
-    
+            parse_scheduled_at = parse_datetime(scheduled_at) if scheduled_at else None
+            parse_interval = timedelta(**interval) if interval else None
+
+            scheduling = Scheduling.objects.create(
+                workflow_uuid=workflow_uuid, 
+                scheduled_at=parse_scheduled_at, 
+                interval=parse_interval, 
+                repeat_count=repeat_count
+            )
+            return scheduling
+        except ObjectDoesNotExist:
+            return {'status': 'error', 'message': 'Workflow not found'}
+        except MultipleObjectsReturned:
+            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
+
     def get_scheduling(self, scheduling_uuid):
         '''
         일치하는 Scheduling 정보를 반환한다.
