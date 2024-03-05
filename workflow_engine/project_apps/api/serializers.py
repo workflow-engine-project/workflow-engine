@@ -26,3 +26,16 @@ def serialize_workflow(workflow_info, jobs_data):
     }
 
     return serialized_workflow
+
+def serialize_scheduling(scheduling_info):
+    serialized_scheduling = {
+        'uuid': scheduling_info.uuid,
+        'scheduled_at': scheduling_info.scheduled_at,
+        'interval': scheduling_info.interval,
+        'repeat_count': scheduling_info.repeat_count,
+        'is_active': scheduling_info.is_active,
+        'created_at': scheduling_info.created_at,
+        'updated_at': scheduling_info.updated_at
+    }
+
+    return serialized_scheduling
