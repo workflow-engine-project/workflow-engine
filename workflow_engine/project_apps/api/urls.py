@@ -1,6 +1,6 @@
 from django.urls import path
 
-from project_apps.api.views import WorkflowAPIView, WorkflowListReadAPIView, WorkflowExecuteAPIView, SchedulingAPIView, SchedulingListReadAPIView, SchedulingExecuteAPIView
+from project_apps.api.views import *
 
 urlpatterns = [
     path('workflow', WorkflowAPIView.as_view()),

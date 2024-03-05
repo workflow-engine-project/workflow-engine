@@ -1,12 +1,15 @@
-import redis
+from functools import wraps
 
 from django.conf import settings
-
-from functools import wraps
+import redis
 
 redis_client = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
+
 def with_lock(func):
+    '''
+    데코레이터를 적용한 해당 함수에 Workflow UUID 별로 Redis Lock을 수행한다.
+    '''
     @wraps(func)
     def wrapper(*args, **kwargs):
         if len(args) > 1 and hasattr(args[0], 'workflow_uuid') and isinstance(args[1], str):

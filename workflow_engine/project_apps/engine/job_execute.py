@@ -1,7 +1,8 @@
+from requests.exceptions import ReadTimeout, ConnectionError
+
 import docker, orjson as json
 from docker.errors import ImageNotFound, APIError
 from celery import shared_task
-from requests.exceptions import ReadTimeout, ConnectionError
 
 from project_apps.constants import JOB_STATUS_RUNNING, JOB_STATUS_SUCCESS, JOB_STATUS_FAIL, WORKFLOW_STATUS_FAIL
 from project_apps.service.workflow_manage import WorkflowManager
@@ -9,6 +10,9 @@ from project_apps.service.workflow_manage import WorkflowManager
 
 @shared_task
 def job_trial(workflow_uuid, history_uuid, job_uuid):
+    '''
+    최대 지정된 retries 수만큼 job을 수행 시도하고, 결과에 따라 처리한다.
+    '''
     workflow_manager = WorkflowManager()
 
     job_data = workflow_manager.find_job_data(workflow_uuid, job_uuid)
@@ -24,6 +28,9 @@ def job_trial(workflow_uuid, history_uuid, job_uuid):
     workflow_manager.handle_failure(workflow_uuid, history_uuid)
     
 def job_execute(workflow_uuid, history_uuid, job_uuid):
+    '''
+    입력 받은 Job을 제한된 timeout 내에 수행하고, 결과에 따라 처리한다.
+    '''
     client = docker.from_env()
     workflow_manager = WorkflowManager()
 

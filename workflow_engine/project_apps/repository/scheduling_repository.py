@@ -7,7 +7,13 @@ from project_apps.models import Scheduling
 
 
 class SchedulingRepository:
+    '''
+    Scheduling 정보를 관리하는 리포지토리.
+    '''
     def create_scheduling(self, workflow_uuid, scheduled_at, interval, repeat_count):
+        '''
+        Scheduling 정보를 생성한다.
+        '''
         parse_scheduled_at = parse_datetime(scheduled_at) if scheduled_at else None
         parse_interval = timedelta(**interval) if interval else None
 
@@ -20,6 +26,9 @@ class SchedulingRepository:
         return scheduling
     
     def get_scheduling(self, scheduling_uuid):
+        '''
+        일치하는 Scheduling 정보를 반환한다.
+        '''
         try:
             scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
             return scheduling
@@ -31,10 +40,16 @@ class SchedulingRepository:
             return {'status': 'error', 'message': str(e)}
 
     def get_scheduling_list(self, workflow_uuid):
+        '''
+        모든 Scheduling의 리스트를 반환한다.
+        '''
         scheduling_list = Scheduling.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'workflow_uuid', 'scheduled_at', 'interval', 'is_active', 'created_at', 'updated_at')
         return list(scheduling_list.values())
 
     def update_scheduling(self, scheduling_uuid, scheduled_at, interval, repeat_count):
+        '''
+        일치하는 Scheduling을 인자에 주어진 정보로 수정한다.
+        '''
         try:
             scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
             
@@ -53,6 +68,9 @@ class SchedulingRepository:
             return {'status': 'error', 'message': str(e)}
 
     def delete_scheduling(self, scheduling_uuid):
+        '''
+        일치하는 Scheduling 정보를 삭제한다.
+        '''
         try:
             scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
             scheduling.delete()

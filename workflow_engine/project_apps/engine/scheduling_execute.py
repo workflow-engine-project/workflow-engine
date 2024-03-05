@@ -9,8 +9,12 @@ cache = Cache()
 scheduling_repo = SchedulingRepository()
 workflow_service = WorkflowService()
 
+
 @shared_task
 def execute_scheduling(scheduling_uuid):
+    '''
+    입력받은 스케줄링을 실행하고, 주기 설정 여부에 따라 처리한다.
+    '''
     scheduling = scheduling_repo.get_scheduling(scheduling_uuid)
 
     execute_scheduling_workflow(scheduling)
@@ -24,11 +28,17 @@ def execute_scheduling(scheduling_uuid):
 
 
 def execute_scheduling_workflow(scheduling):
+    '''
+    입력받은 스케줄링을 실행한다.
+    '''
     workflow_service.execute_workflow(scheduling.workflow_uuid)
     print(f"스케줄링 작업 실행: {scheduling.uuid} at {timezone.now()}")
 
 
 def manage_repeated_execution(scheduling):
+    '''
+    스케줄링의 남은 반복 횟수를 계산하고 이에 따라 활성/비활성화한다.
+    '''
     repeat_key = f"scheduling:{scheduling.uuid}:repeat_count"
     repeat_count = cache.get(repeat_key)
 

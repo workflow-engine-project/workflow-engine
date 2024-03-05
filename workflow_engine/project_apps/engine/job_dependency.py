@@ -10,6 +10,9 @@ from project_apps.engine.tasks_manager import job_execute
 
 @shared_task
 def job_dependency(workflow_uuid, history_uuid):
+    '''
+    캐싱된 Workflow 내 job들 사이의 의존성 관계에 따라 다음 job을 수행한다.
+    '''
     try:
         cache = Cache()
         job_list_json = cache.get(workflow_uuid)

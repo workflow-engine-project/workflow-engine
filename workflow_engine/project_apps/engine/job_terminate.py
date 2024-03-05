@@ -5,7 +5,7 @@ from celery import shared_task
 @shared_task
 def job_terminate(container_id):
     '''
-    도커 컨테이너를 종료하는 Celery 태스크
+    입력받은 도커 컨테이너를 종료한다.
     '''
     client = docker.from_env()
     try:
