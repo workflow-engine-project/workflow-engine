@@ -34,11 +34,31 @@ class SchedulingService:
 
         return serialize_scheduling(scheduling)
 
-    def get_scheduling_list(self, workflow_uuid):
+    def get_workflow_scheduling_list(self, workflow_uuid):
+        '''
+        특정 워크플로우에 종속된 Scheduling의 정보를 반환한다.
+        '''
+        schedulings = self.scheduling_repository.get_workflow_scheduling_list(workflow_uuid)
+        schedulings_info = []
+        for scheduling in schedulings:
+            schedulings_info.append({
+                'uuid': scheduling['uuid'],
+                'workflow_uuid': scheduling['workflow_uuid'],
+                'scheduled_at': scheduling['scheduled_at'],
+                'interval': scheduling['interval'],
+                'repeat_count': scheduling['repeat_count'],
+                'is_active': scheduling['is_active'],
+                'created_at': scheduling['created_at'],
+                'updated_at': scheduling['updated_at'],
+            })
+
+        return schedulings_info
+    
+    def get_scheduling_list(self):
         '''
         모든 Scheduling의 정보를 반환한다.
         '''
-        schedulings = self.scheduling_repository.get_scheduling_list(workflow_uuid)
+        schedulings = self.scheduling_repository.get_scheduling_list()
         schedulings_info = []
         for scheduling in schedulings:
             schedulings_info.append({

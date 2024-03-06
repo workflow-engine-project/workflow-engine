@@ -48,11 +48,18 @@ class SchedulingRepository:
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
 
-    def get_scheduling_list(self, workflow_uuid):
+    def get_workflow_scheduling_list(self, workflow_uuid):
+        '''
+        특정 워크플로우에 종속된 Scheduling의 리스트를 반환한다.
+        '''
+        scheduling_list = Scheduling.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'workflow_uuid', 'scheduled_at', 'interval', 'is_active', 'created_at', 'updated_at')
+        return list(scheduling_list.values())
+    
+    def get_scheduling_list(self):
         '''
         모든 Scheduling의 리스트를 반환한다.
         '''
-        scheduling_list = Scheduling.objects.filter(workflow_uuid=workflow_uuid).values('uuid', 'workflow_uuid', 'scheduled_at', 'interval', 'is_active', 'created_at', 'updated_at')
+        scheduling_list = Scheduling.objects.all()
         return list(scheduling_list.values())
 
     def update_scheduling(self, scheduling_uuid, scheduled_at, interval, repeat_count):
