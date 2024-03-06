@@ -23,18 +23,6 @@ class SchedulingService:
             interval=interval,
             repeat_count=repeat_count
         )
-        scheduling_info = {
-            'uuid': scheduling.uuid,
-            'workflow_uuid': scheduling.workflow_uuid,
-            'scheduled_at': scheduling.scheduled_at,
-            'interval': scheduling.interval,
-            'repeat_count': scheduling.repeat_count,
-            'is_active': scheduling.is_active,
-            'created_at': scheduling.created_at,
-            'updated_at': scheduling.updated_at
-        }
-
-        return scheduling_info
 
         return serialize_scheduling(scheduling)
 
@@ -43,16 +31,6 @@ class SchedulingService:
         입력 받은 Scheduling을 반환한다.
         '''
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
-        scheduling_info = {
-            'uuid': scheduling.uuid,
-            'workflow_uuid': scheduling.workflow_uuid,
-            'scheduled_at': scheduling.scheduled_at,
-            'interval': scheduling.interval,
-            'repeat_count': scheduling.repeat_count,
-            'is_active': scheduling.is_active,
-            'created_at': scheduling.created_at,
-            'updated_at': scheduling.updated_at
-        }
 
         return serialize_scheduling(scheduling)
 
@@ -87,16 +65,6 @@ class SchedulingService:
             interval=scheduling_data.get('interval'),
             repeat_count=scheduling_data.get('repeat_count'),
         )
-        scheduling_info = {
-            'uuid': scheduling.uuid,
-            'workflow_uuid': scheduling.workflow_uuid,
-            'scheduled_at': scheduling.scheduled_at,
-            'interval': scheduling.interval,
-            'repeat_count': scheduling.repeat_count,
-            'is_active': scheduling.is_active,
-            'created_at': scheduling.created_at,
-            'updated_at': scheduling.updated_at,
-        }
 
         return serialize_scheduling(scheduling)
 
