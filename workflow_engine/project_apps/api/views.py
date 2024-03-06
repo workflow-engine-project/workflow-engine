@@ -184,16 +184,30 @@ class SchedulingAPIView(APIView):
                         status=status.HTTP_204_NO_CONTENT)
 
 
+class WorkflowSchedulingListReadAPIView(APIView):
+    '''
+    특정 워크플로우에 종속된 Scheduling의 정보와 각각의 Job 리스트를 반환하는 API.
+    '''
+    def get(self, request, workflow_uuid):
+        '''
+        특정 워크플로우에 종속된 Scheduling의 리스트를 반환한다.
+        '''
+        scheduling_service = SchedulingService()
+        scheduling_list = scheduling_service.get_workflow_scheduling_list(workflow_uuid)
+
+        return Response(scheduling_list, status=status.HTTP_200_OK)
+
+
 class SchedulingListReadAPIView(APIView):
     '''
     모든 Scheduling의 정보와 각각의 Job 리스트를 반환하는 API.
     '''
-    def get(self, request, workflow_uuid):
+    def get(self, request):
         '''
         모든 Scheduling의 리스트를 반환한다.
         '''
         scheduling_service = SchedulingService()
-        scheduling_list = scheduling_service.get_scheduling_list(workflow_uuid)
+        scheduling_list = scheduling_service.get_scheduling_list()
 
         return Response(scheduling_list, status=status.HTTP_200_OK)
 

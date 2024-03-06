@@ -9,6 +9,7 @@ urlpatterns = [
     path('workflow/execute/<uuid:workflow_uuid>', WorkflowExecuteAPIView.as_view()),
     path('workflow/scheduling', SchedulingAPIView.as_view()),
     path('workflow/scheduling/<uuid:scheduling_uuid>', SchedulingAPIView.as_view()),
-    path('workflow/scheduling/list/<uuid:workflow_uuid>', SchedulingListReadAPIView.as_view()),
+    path('workflow/scheduling/list', SchedulingListReadAPIView.as_view()),
+    path('workflow/scheduling/list/<uuid:workflow_uuid>', WorkflowSchedulingListReadAPIView.as_view()),
     path('workflow/scheduling/execute/<uuid:scheduling_uuid>', SchedulingExecuteAPIView.as_view()),
 ]
