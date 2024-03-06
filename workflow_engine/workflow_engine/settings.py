@@ -66,10 +66,10 @@ WSGI_APPLICATION = 'workflow_engine.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRESQL_NAME'), # 데이터베이스 이름
+        'NAME': env('POSTGRESQL_NAME'),
         'USER': env('POSTGRESQL_USER'),
         'PASSWORD': env('POSTGRESQL_PWD'),
-        'HOST': 'db',
+        'HOST': env('POSTGRESQL_HOST'),
         'PORT': env('POSTGRESQL_PORT'),
     }
 }
