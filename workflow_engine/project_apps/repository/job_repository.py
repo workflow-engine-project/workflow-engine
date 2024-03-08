@@ -1,4 +1,4 @@
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.db import IntegrityError
 
 from project_apps.models import Job
 
@@ -11,18 +11,21 @@ class JobRepository:
         '''
         Job 정보를 생성한다.
         '''
-        job = Job.objects.create(
-            workflow_uuid=workflow_uuid,
-            name=name,
-            image=image,
-            parameters=parameters,
-            next_job_names=next_job_names,
-            depends_count=depends_count,
-            timeout=timeout,
-            retries=retries
-        )
-        
-        return job
+        try:
+            job = Job.objects.create(
+                workflow_uuid=workflow_uuid,
+                name=name,
+                image=image,
+                parameters=parameters,
+                next_job_names=next_job_names,
+                depends_count=depends_count,
+                timeout=timeout,
+                retries=retries
+            )
+            
+            return job
+        except Exception as e:
+            raise ValueError(str(e))
 
     def get_job(self, job_uuid):
         '''
@@ -31,12 +34,8 @@ class JobRepository:
         try:
             job = Job.objects.get(uuid=job_uuid)
             return job
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Job not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple Jobs found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def update_job(self, job_uuid, name, image, parameters, next_job_names, depends_count, timeout, retries):
         '''
@@ -51,12 +50,10 @@ class JobRepository:
             job.save()
 
             return job
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Job not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple Jobs found with the same UUID'}
+        except IntegrityError:
+            raise ValueError(f'Job with name {job.name} already exists.')
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def delete_job(self, job_uuid):
         '''
@@ -66,12 +63,8 @@ class JobRepository:
             job = Job.objects.get(uuid=job_uuid)
             job.delete()
             return {'status': 'success', 'message': 'job deleted successfully'}
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'job not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple jobs found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def get_job_list(self, workflow_uuid):
         '''

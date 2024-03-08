@@ -11,8 +11,11 @@ class WorkflowRepository:
         '''
         Workflow 정보를 생성한다.
         '''
-        workflow = Workflow.objects.create(name=name, description=description)
-        return workflow
+        try:
+            workflow = Workflow.objects.create(name=name, description=description)
+            return workflow
+        except Exception as e:
+            raise ValueError(str(e))
 
     def get_workflow(self, workflow_uuid):
         '''
@@ -21,12 +24,8 @@ class WorkflowRepository:
         try:
             workflow = Workflow.objects.get(uuid=workflow_uuid)
             return workflow
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Workflow not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def update_workflow(self, workflow_uuid, name, description):
         '''
@@ -41,12 +40,8 @@ class WorkflowRepository:
             workflow.save()
 
             return workflow
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Workflow not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def delete_workflow(self, workflow_uuid):
         '''
@@ -56,12 +51,8 @@ class WorkflowRepository:
             workflow = Workflow.objects.get(uuid=workflow_uuid)
             workflow.delete()
             return {'status': 'success', 'message': 'Workflow deleted successfully'}
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Workflow not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def get_workflow_list(self):
         '''
