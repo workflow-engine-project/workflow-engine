@@ -10,4 +10,5 @@ urlpatterns = [
     path('scheduling/<uuid:scheduling_uuid>', SchedulingUUIDAPIView.as_view()),
     path('scheduling/workflow/<uuid:workflow_uuid>', SchedulingWorkflowAPIView.as_view()),
     path('scheduling/<uuid:scheduling_uuid>/execute', SchedulingExecuteAPIView.as_view()),
+    path('scheduling/<uuid:scheduling_uuid>/deactive', SchedulingDeactivateAPIView.as_view()),
 ]

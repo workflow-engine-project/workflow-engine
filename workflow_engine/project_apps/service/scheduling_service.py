@@ -124,3 +124,17 @@ class SchedulingService:
             execute_scheduling.delay(scheduling_uuid)
 
         return True, "스케줄링이 활성화되었습니다. 예정된 시간에 실행됩니다."
+
+    @transaction.atomic
+    def deactivate_scheduling(self, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 비활성화한다.
+        '''
+        scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
+
+        if not scheduling.is_active:
+            return False, "스케줄링이 이미 비활성화되어 있습니다."
+
+        success, message = self.scheduling_repository.deactivate_scheduling(scheduling_uuid)
+
+        return success, message

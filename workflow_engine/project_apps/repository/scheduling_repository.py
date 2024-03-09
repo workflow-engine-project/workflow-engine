@@ -81,3 +81,15 @@ class SchedulingRepository:
             return {'status': 'success', 'message': 'Scheduling deleted successfully'}
         except Exception as e:
             raise ValueError(str(e))
+        
+    def deactivate_scheduling(self, scheduling_uuid):
+        '''
+        일치하는 Scheduling를 비활성화한다.
+        '''
+        try:
+            scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
+            scheduling.is_active = False
+            scheduling.save()
+            return True, "스케줄링이 비활성화되었습니다."
+        except Exception as e:
+            raise ValueError(str(e))
