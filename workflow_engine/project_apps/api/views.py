@@ -227,9 +227,9 @@ class SchedulingExecuteAPIView(APIView):
         success, message = scheduling_service.activate_scheduling(scheduling_uuid)
 
         if not success:
-            return Response({"error": message}, status=400)
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"message": message})
+        return Response({"message": message}, status=status.HTTP_200_OK)
 
 
 class SchedulingDeactivateAPIView(APIView):
