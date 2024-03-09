@@ -154,7 +154,7 @@ class SchedulingAPIView(APIView):
 
     def patch(self, request, scheduling_uuid):
         '''
-        입력 받은 Scheduling을 전송 받은 데이터로 수정한다.
+        Scheduling을 전송 받은 데이터로 수정한다.
         '''
         scheduling_data = request.data
 
@@ -163,11 +163,13 @@ class SchedulingAPIView(APIView):
 
         scheduling_service = SchedulingService()
         try:
-            scheduling = scheduling_service.update_scheduling(scheduling_uuid, scheduling_data)
+            success, result = scheduling_service.update_scheduling(scheduling_uuid, scheduling_data)
+            if success:
+                return Response(result, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": result}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(scheduling, status=status.HTTP_200_OK)
 
     def delete(self, request, scheduling_uuid):
         '''
