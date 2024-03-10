@@ -79,6 +79,11 @@ class SchedulingService:
         '''
         입력 받은 Scheduling을 전송 받은 데이터로 수정한다.
         '''
+        scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
+
+        if scheduling.is_active:
+            return False, "스케줄링이 이미 활성화되었으므로 업데이트할 수 없습니다."
+         
         scheduling = self.scheduling_repository.update_scheduling(
             scheduling_uuid,
             scheduled_at=scheduling_data.get('scheduled_at'),
@@ -86,7 +91,7 @@ class SchedulingService:
             repeat_count=scheduling_data.get('repeat_count'),
         )
 
-        return serialize_scheduling(scheduling)
+        return True, serialize_scheduling(scheduling)
 
     @transaction.atomic
     def delete_scheduling(self, scheduling_uuid):
