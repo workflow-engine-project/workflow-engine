@@ -26,13 +26,20 @@ class WorkflowService:
         입력 받은 데이터를 바탕으로 의존성 카운트를 계산하고, 
         Workflow와 Job 리스트를 생성하고 그 결과를 반환한다.
         '''
-        # 의존성이 걸린 작업의 실존 여부 판별
-        jobs_name = [job_data['name'] for job_data in jobs_data]
+        # Job 이름의 중복 여부 판별
+        jobs_name = []
 
+        for job_data in jobs_data:
+            if job_data.get('name') in jobs_name:
+                raise ValueError(f"Multiple Jobs found with the same name {job_data.get('name')}")
+            else:
+                jobs_name.append(job_data.get('name'))
+
+        # 의존성이 걸린 작업의 실존 여부 판별
         for job_data in jobs_data:
             for next_job_name in job_data.get('next_job_names', []):
                 if next_job_name not in jobs_name:
-                    return {'status': 'error', 'message': f"Job '{next_job_name}' referenced in next_job_names does not exist"}
+                    raise ValueError (f"Job '{next_job_name}' referenced in next_job_names does not exist")
 
         workflow = self.workflow_repository.create_workflow(
             name=name, 
@@ -86,7 +93,7 @@ class WorkflowService:
         for job_data in jobs_data:
             for next_job_name in job_data.get('next_job_names', []):
                 if next_job_name not in jobs_name:
-                    return {'status': 'error', 'message': f"Job '{next_job_name}' referenced in next_job_names does not exist"}
+                    raise ValueError(f"'{job_data.get('name')}' references '{next_job_name}' in its next_job_names, but '{next_job_name}' does not exist")
 
         workflow = self.workflow_repository.update_workflow(
             workflow_uuid=workflow_uuid,

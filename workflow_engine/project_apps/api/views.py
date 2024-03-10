@@ -25,7 +25,7 @@ class WorkflowAPIView(APIView):
         workflow_service = WorkflowService()
         try:
             workflow = workflow_service.create_workflow(name, description, jobs_data)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(workflow, status=status.HTTP_201_CREATED)
@@ -40,7 +40,7 @@ class WorkflowAPIView(APIView):
         workflow_service = WorkflowService()
         try:
             workflow = workflow_service.get_workflow(workflow_uuid)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(workflow, status=status.HTTP_200_OK)
@@ -58,7 +58,7 @@ class WorkflowAPIView(APIView):
         workflow_service = WorkflowService()
         try:
             workflow = workflow_service.update_workflow(workflow_uuid, workflow_data, jobs_data)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(workflow, status=status.HTTP_200_OK)
@@ -71,7 +71,7 @@ class WorkflowAPIView(APIView):
 
         try:
             result = workflow_service.delete_workflow(workflow_uuid)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         if result:
@@ -132,7 +132,7 @@ class SchedulingAPIView(APIView):
         scheduling_service = SchedulingService()
         try:
             scheduling = scheduling_service.create_scheduling(workflow_uuid, scheduled_at, interval, repeat_count)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(scheduling, status=status.HTTP_201_CREATED)
@@ -147,7 +147,7 @@ class SchedulingAPIView(APIView):
         scheduling_service = SchedulingService()
         try:
             scheduling = scheduling_service.get_scheduling(scheduling_uuid)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(scheduling, status=status.HTTP_200_OK)
@@ -164,7 +164,7 @@ class SchedulingAPIView(APIView):
         scheduling_service = SchedulingService()
         try:
             scheduling = scheduling_service.update_scheduling(scheduling_uuid, scheduling_data)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(scheduling, status=status.HTTP_200_OK)
@@ -177,7 +177,7 @@ class SchedulingAPIView(APIView):
 
         try:
             scheduling_service.delete_scheduling(scheduling_uuid)
-        except ValidationError as e:
+        except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'success': f'Scheduling with uuid {scheduling_uuid} deleted successfully.'},

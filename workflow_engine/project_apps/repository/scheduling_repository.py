@@ -27,12 +27,8 @@ class SchedulingRepository:
                 repeat_count=repeat_count
             )
             return scheduling
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Workflow not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple workflows found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def get_scheduling(self, scheduling_uuid):
         '''
@@ -41,12 +37,8 @@ class SchedulingRepository:
         try:
             scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
             return scheduling
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Scheduling not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple schedulings found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def get_workflow_scheduling_list(self, workflow_uuid):
         '''
@@ -76,12 +68,8 @@ class SchedulingRepository:
             scheduling.save()
 
             return scheduling
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Scheduling not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple schedulings found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))
 
     def delete_scheduling(self, scheduling_uuid):
         '''
@@ -91,9 +79,5 @@ class SchedulingRepository:
             scheduling = Scheduling.objects.get(uuid=scheduling_uuid)
             scheduling.delete()
             return {'status': 'success', 'message': 'Scheduling deleted successfully'}
-        except ObjectDoesNotExist:
-            return {'status': 'error', 'message': 'Scheduling not found'}
-        except MultipleObjectsReturned:
-            return {'status': 'error', 'message': 'Multiple Schedulings found with the same UUID'}
         except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+            raise ValueError(str(e))

@@ -2,6 +2,12 @@ def serialize_workflow(workflow_info, jobs_data):
     '''
     입력받은 Workflow와 Job 모델 객체를 직렬화한다.
     '''
+    if type(workflow_info) is dict:
+        raise ValueError("요청받은 workflow 정보의 형식이 올바르지 않습니다.")
+    
+    if type(jobs_data[0]) is dict:
+        raise ValueError("요청받은 job 정보의 형식이 올바르지 않습니다.")
+    
     serialized_jobs = []
     for job_data in jobs_data:
         serialized_job = {
@@ -28,6 +34,9 @@ def serialize_workflow(workflow_info, jobs_data):
     return serialized_workflow
 
 def serialize_scheduling(scheduling_info):
+    if type(scheduling_info) is dict:
+        raise ValueError("요청받은 scheduling 정보의 형식이 올바르지 않습니다.")
+    
     serialized_scheduling = {
         'uuid': scheduling_info.uuid,
         'scheduled_at': scheduling_info.scheduled_at,
