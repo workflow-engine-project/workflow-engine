@@ -227,6 +227,23 @@ class SchedulingExecuteAPIView(APIView):
         success, message = scheduling_service.activate_scheduling(scheduling_uuid)
 
         if not success:
-            return Response({"error": message}, status=400)
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"message": message})
+        return Response({"message": message}, status=status.HTTP_200_OK)
+
+
+class SchedulingDeactivateAPIView(APIView):
+    '''
+    Scheduling을 비활성화하는 API.
+    '''
+    def post(self, request, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 비활성화한다.
+        '''
+        scheduling_service = SchedulingService()
+        success, message = scheduling_service.deactivate_scheduling(scheduling_uuid)
+
+        if not success:
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": message}, status=status.HTTP_200_OK)

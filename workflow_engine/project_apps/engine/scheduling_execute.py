@@ -17,6 +17,10 @@ def execute_scheduling(scheduling_uuid):
     '''
     scheduling = scheduling_repo.get_scheduling(scheduling_uuid)
 
+    if not scheduling.is_active:
+        print(f"{scheduling_uuid} 스케줄링이 비활성화 상태로 변경되었습니다. 실행을 종료합니다")
+        return
+
     execute_scheduling_workflow(scheduling)
 
     if not scheduling.interval:

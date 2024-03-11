@@ -101,7 +101,8 @@ class SchedulingService:
         scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
 
         self.scheduling_repository.delete_scheduling(scheduling.uuid)
-    
+        
+    @transaction.atomic
     def activate_scheduling(self, scheduling_uuid):
         '''
         입력 받은 Scheduling을 활성화한다.
@@ -114,13 +115,25 @@ class SchedulingService:
         if scheduling.scheduled_at and scheduling.scheduled_at < timezone.now():
             return False, "스케줄링 예정된 시간이 지났습니다."
             
-        scheduling.is_active = True
-        scheduling.save()
-
+        success, message = self.scheduling_repository.activate_scheduling(scheduling_uuid)
         if scheduling.scheduled_at:
             delay = (scheduling.scheduled_at - timezone.now()).total_seconds()
             execute_scheduling.apply_async((scheduling_uuid,), countdown=delay)
         else:
             execute_scheduling.delay(scheduling_uuid)
 
-        return True, "스케줄링이 활성화되었습니다. 예정된 시간에 실행됩니다."
+        return success, message
+
+    @transaction.atomic
+    def deactivate_scheduling(self, scheduling_uuid):
+        '''
+        입력 받은 Scheduling을 비활성화한다.
+        '''
+        scheduling = self.scheduling_repository.get_scheduling(scheduling_uuid)
+
+        if not scheduling.is_active:
+            return False, "스케줄링이 이미 비활성화되어 있습니다."
+
+        success, message = self.scheduling_repository.deactivate_scheduling(scheduling_uuid)
+
+        return success, message
