@@ -100,9 +100,8 @@ class WorkflowService:
 
         for job_data in jobs_data:
             job_uuid = uuid.UUID(job_data['uuid'])
-            job_name = job_data['name']
-
             current_job = existing_jobs_dict.get(job_uuid)
+            job_name = job_data.get('name') if job_data.get('name') else current_job.name
 
             new_next_job_names = job_data.get('next_job_names', [])
             for next_job_name in new_next_job_names:
@@ -124,11 +123,11 @@ class WorkflowService:
             job_updates[job_uuid] = {
                 "uuid": job_uuid,
                 "name": job_name,
-                "image": job_data['image'],
-                "parameters": job_data['parameters'],
-                "next_job_names": new_next_job_names,
-                "timeout": job_data.get('timeout', 0),
-                "retries": job_data.get('retries', 0),
+                "image": job_data.get('image') if job_data.get('image') else current_job.image,
+                "parameters": job_data.get('parameters') if job_data.get('parameters') else current_job.parameters,
+                "next_job_names": new_next_job_names if job_data.get('next_job_names') else current_job.next_job_names,
+                "timeout": job_data.get('timeout') if job_data.get('timeout') else current_job.timeout,
+                "retries": job_data.get('retries') if job_data.get('retries') else current_job.retries,
                 "depends_count": existing_jobs_dict[job_uuid].depends_count if job_uuid in existing_jobs_dict else 0
             }
 
