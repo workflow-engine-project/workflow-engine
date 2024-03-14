@@ -88,6 +88,8 @@ class WorkflowService:
         입력 받은 Workflow와 Job 리스트를 주어진 데이터로 수정하고, 
         그 결과를 반환한다.
         '''
+        current_workflow = self.workflow_repository.get_workflow(workflow_uuid)
+
         existing_jobs = self.job_repository.get_job_list(workflow_uuid)
         existing_jobs_dict = {job.uuid: job for job in existing_jobs}
 
@@ -165,8 +167,8 @@ class WorkflowService:
 
         workflow_info = self.workflow_repository.update_workflow(
             workflow_uuid=workflow_uuid,
-            name=workflow_data.get('name', ''),
-            description=workflow_data.get('description', '')
+            name=workflow_data.get('name') if workflow_data.get('name') else current_workflow.name,
+            description=workflow_data.get('description') if workflow_data.get('description') else current_workflow.description
         )
 
         return serialize_workflow(workflow_info, update_jobs)
