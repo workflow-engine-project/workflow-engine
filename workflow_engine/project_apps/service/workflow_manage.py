@@ -66,6 +66,10 @@ class WorkflowManager:
             if running_containers:
                 for container_id in running_containers:
                     job_terminate.apply_async(args=[container_id])
+            print(f"Workflow {workflow_uuid} has failed and is now terminated.")
+
+        else:
+            print(f"Workflow {workflow_uuid} has successfully completed and is now terminated.")
     
     def check_workflow_status(self, workflow_uuid):
         '''
