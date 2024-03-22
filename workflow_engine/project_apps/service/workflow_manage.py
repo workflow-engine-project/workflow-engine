@@ -1,6 +1,6 @@
 import orjson as json
 
-from project_apps.constants import HISTORY_STATUS_FAIL, HISTORY_STATUS_SUCCESS, JOB_STATUS_SUCCESS, WORKFLOW_STATUS_FAIL, WORKFLOW_STATUS_SUCCESS
+from project_apps.constants import HISTORY_STATUS_FAIL, HISTORY_STATUS_SUCCESS, JOB_STATUS_SUCCESS, JOB_STATUS_FAIL, WORKFLOW_STATUS_FAIL, WORKFLOW_STATUS_SUCCESS
 from project_apps.engine.job_terminate import job_terminate
 from project_apps.engine.tasks_manager import job_dependency
 from project_apps.models.cache import Cache
@@ -38,12 +38,13 @@ class WorkflowManager:
 
         workflow_status = self.check_workflow_status(workflow_uuid)
         if workflow_status == WORKFLOW_STATUS_FAIL:
-            for job in workflow_data:
-                if job['uuid'] == str(job_uuid):
-                    job['result'] = status
-                    print(f"{job['uuid'], job['result']}")
-                    break
-            self.cache.set(workflow_uuid, json.dumps(workflow_data))
+            if status == JOB_STATUS_FAIL:
+                for job in workflow_data:
+                    if job['uuid'] == str(job_uuid):
+                        job['result'] = status
+                        print(f"{job['uuid'], job['result']}")
+                        break
+                self.cache.set(workflow_uuid, json.dumps(workflow_data))
             return False
         else:
             for job in workflow_data:

@@ -21,7 +21,8 @@ def job_trial(workflow_uuid, history_uuid, job_uuid):
     
     retries = job_data['retries']
     for _ in range(retries+1):
-        if job_execute(workflow_uuid, history_uuid, job_uuid):
+        result = job_execute(workflow_uuid, history_uuid, job_uuid)
+        if result is not None:
             return
     
     workflow_manager.update_job_status(workflow_uuid, job_uuid, JOB_STATUS_FAIL)
@@ -63,10 +64,10 @@ def job_execute(workflow_uuid, history_uuid, job_uuid):
             container.remove()
             return True
         else:
-            return False
+            return None
 
     except (ReadTimeout, ConnectionError, ImageNotFound, APIError) as e:
-        return False
+        return None
 
     except Exception as e:
-        return False
+        return None
