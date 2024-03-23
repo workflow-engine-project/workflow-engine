@@ -173,8 +173,8 @@ MVP1 리팩터링을 진행한다.
 - Docker 컨테이너의 환경변수 적용 로직을 구현한다.
 - MVP1 리팩터링 전 발생했던 버그를 수정한다.
 - 순환 import 문제를 해결한다.
-- `HistoryRepository` 의 `update_history_status()` 메서드를 수정한다.
-- `update_workflow()` 메서드에 `@transaction` 데코레이터를 추가한다.
+- HistoryRepository 의 update_history_status() 메서드를 수정한다.
+- update_workflow() 메서드에 @transaction 데코레이터를 추가한다.
 - CRUD API 관련 리팩터링을 진행한다.
 - 워크플로우 Read API의 에러를 수정한다.
 - 워크플로우 Update API의 에러를 수정한다.
@@ -183,8 +183,8 @@ MVP1 리팩터링을 진행한다.
 - 워크플로우 CRUD API 뷰 클래스를 하나로 통합한다.
 - 워크플로우 CRUD API의 serialize 과정을 리팩터링한다.
 - 워크플로우의 수정된 데이터에 기반하여 depends_count가 변경되도록 로직을 수정한다.
-- `Job` 테이블의 `parameters`, `next_job_names` 필드를 JSON으로 파싱한다.
-- `Job` 테이블의 `next_job_names` 필드를 JSON으로 파싱하는 에러를 수정한다.
+- Job 테이블의 parameters, next_job_names 필드를 JSON으로 파싱한다.
+- Job 테이블의 next_job_names 필드를 JSON으로 파싱하는 에러를 수정한다.
 - job 실행 로직과 job 의존성 관련 로직을 분리한다.
 - job의 timeout 및 retry 옵션 값 설정을 구현한다.
 - job이 실패 처리되었을 경우 해당 워크플로우의 실행중인 job들도 모두 종료하는 로직으로 수정한다.
@@ -196,7 +196,7 @@ MVP1 리팩터링을 진행한다.
 - 스케줄링 실행 로직을 확정 및 구현한다.
 - 스케줄링 실행 API를 구현한다.
 - 스케줄링 DB 모델을 확정 및 수정한다.
-- 스케줄링 DB에서 `is_active` 필드의 default 옵션 값을 수정한다.
+- 스케줄링 DB에서 is_active 필드의 default 옵션 값을 수정한다.
 - 스케줄링 CRUD API를 구현한다.
 - 스케줄링 Create 로직을 수정한다.
 - 수정된 스케줄링 DB 관련 CRUD API 리팩터링 작업을 진행한다.
@@ -206,12 +206,21 @@ MVP1 리팩터링을 진행한다.
 MVP2 리팩터링을 진행한다.
 ```
 - 코드 컨벤션을 점검하고 수정한다.
+- Redis host와 port를 환경변수로 관리한다.
+- URL 관련 리팩터링을 진행한다.
 - 스케줄링 CRUD API 관련 버그를 수정한다.
 - 스케줄링 serializer를 구현한다.
+- 스케줄링이 이미 활성화 상태라면 업데이트가 되지 않도록 구현한다.
+- 스케줄링 is_active 상태를 임의로 False로 바꿀수 있는 로직을 추가 구현한다.
 - 의존성이 걸린 작업의 실존 여부를 검사하는 로직을 추가한다.
 - job이 실패 처리 됐을 때의 retry 로직을 수정한다.
-- `WorkflowManager` 클래스 내 `history_repo` 중복 인자를 제거한다.
-- Redis host와 port를 환경변수로 관리한다.
+- 워크플로우 업데이트 로직 리팩토링을 진행한다.
+- 워크플로우의 실행 로직에서, 워크플로우의 상태에 따라 다른 반환 값을 제공하도록 수정한다.
+- 워크플로우 종료(성공/실패)시 터미널에 종료 메세지를 출력한다.
+- WorkflowManager 클래스 내 history_repo 중복 인자를 제거한다.
+- workflow_engine 컨테이너 내부에서 Docker 데몬과 연결되지 않고 있는 문제를 해결한다.
+- Swagger를 통한 프로젝트 API 명세서를 구현한다.
+- README.md를 수정한다.
 ```
 
 ## 아키텍쳐
@@ -220,34 +229,34 @@ MVP2 리팩터링을 진행한다.
 ## 모델 및 ERD
 ![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/4cdf06a4-cae2-4bdb-b9c8-2709f0c67cab)
 
-- Workflow는 사용자가 정의한 워크플로우를 저장한다.
-- Job은 워크플로우 내부에서 정의한 각각의 작업을 저장한다.
-- History는 워크플로우를 실행한 기록을 저장한다.
-- Scheduling은 워크플로우를 지정된 시간과 횟수만큼 실행하기 위한 스케줄링 정보를 저장한다.
+- `Workflow`는 사용자가 정의한 워크플로우를 저장한다.
+- `Job`은 워크플로우 내부에서 정의한 각각의 작업을 저장한다.
+- `History`는 워크플로우를 실행한 기록을 저장한다.
+- `Scheduling`은 워크플로우를 지정된 시간과 횟수만큼 실행하기 위한 스케줄링 정보를 저장한다.
 
 ## 기능별 시퀀스 다이어그램
 
 ### 스케줄링 실행 로직
-![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/837ef6f0-d12c-498c-8deb-272f2c9cb512)
+![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/b3612f82-59ca-41d9-bae2-b32cc1503024)
 
 ### 워크플로우 실행 로직
-![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/d234fcf5-233f-42d1-a067-9157711efd88)
+![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/97620f8c-c738-42ce-9dc7-b4aee1055ffa)
 
 ### 의존성 알고리즘 로직
-![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/84d89517-b5e7-4251-88bb-2efcb92c392d)
+![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/4b8883de-802b-4c33-9b38-5f9a8f6978d0)
 
 ### 워크플로우 성공/실패 분기로직
 
 #### 작업 실행 성공 로직
-![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/a1e019f8-4857-4308-87aa-a981ef83a40a)
+![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/add5e642-1015-43c0-8e6b-f1c79cac98c8)
 
 #### 작업 실행 실패 로직
-![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/4ce463d2-edfc-4b26-9e01-313b5aa3ed29)
+![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/873a854a-209e-4a56-8afa-be59c7d001dc)
 
 ## API 명세서
 ![image](https://github.com/workflow-engine-project/workflow-engine/assets/41356191/94556c54-9806-4a90-9ff9-5bf08dabcbb7)
 
-Swagger를 통해 구성한 API 테스트 페이지(/swagger)에서 API의 입력값을 넣어 출력값을 확인할 수 있습니다.
+Swagger를 통해 구성한 API 테스트 페이지(`/swagger`)에서 API의 입력값을 넣어 출력값을 확인할 수 있습니다.
 
 |이름|URL|Method|
 |---|---|---|
@@ -312,3 +321,9 @@ Swagger를 통해 구성한 API 테스트 페이지(/swagger)에서 API의 입�
 ┣ 📜 docker-compose.yml
 ┣ 📜 requirements.txt
 ```
+- `api`: 클라이언트의 요청 및 응답을 처리하는 뷰 로직과 라우팅을 담당합니다.
+- `engine`: 비동기 작업과 백그라운드 작업의 생명주기를 관리하는 Celery 관련 로직을 포함합니다.
+- `models`: 데이터 구조를 나타내는 Django ORM 모델을 포함합니다.
+- `repository`: 데이터베이스 액세스를 추상화하여 비즈니스 로직과 데이터 액세스 계층을 분리합니다.
+- `service`: 애플리케이션의 비즈니스 로직을 포함합니다.
+> 레포지토리 패턴을 기반으로 하여, 데이터 엑세스 계층을 비즈니스 로직(service)으로부터 분리하였습니다. 이러한 구조는 코드의 유지보수성(데이터 소스 변경가능)과 확장성을 향상시키고, 다른 사람들도 코드베이스를 더 쉽게 이해할 수 있을것이라고 생각하여 현재 프로젝트 파일트리와 같은 디렉토리 구조로 진행하였습니다.
