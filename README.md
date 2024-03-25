@@ -261,18 +261,18 @@ Swagger를 통해 구성한 API 테스트 페이지(`/swagger`)에서 API의 입
 |이름|URL|Method|
 |---|---|---|
 |Workflow|||
-|워크플로우 생성|workflow/|POST|
-|전체 워크플로우 리스트 조회|workflow/|GET|
-|워크플로우 조회|workflow/\<uuid:workflow_uuid>/|GET|
-|워크플로우 수정|workflow/\<uuid:workflow_uuid>/|PATCH|
-|워크플로우 삭제|workflow/\<uuid:workflow_uuid>/|DELETE|
+|워크플로우 생성|workflow|POST|
+|전체 워크플로우 리스트 조회|workflow|GET|
+|워크플로우 조회|workflow/\<uuid:workflow_uuid>|GET|
+|워크플로우 수정|workflow/\<uuid:workflow_uuid>|PATCH|
+|워크플로우 삭제|workflow/\<uuid:workflow_uuid>|DELETE|
 |워크플로우 실행|workflow/\<uuid:workflow_uuid>/execute|GET|
 |Scheduling|||
-|스케줄링 생성|scheduling/|POST|
-|전체 스케줄링 리스트 조회|scheduling/|GET|
-|스케줄링 조회|scheduling/\<uuid:scheduling_uuid>/|GET|
-|스케줄링 수정|scheduling/\<uuid:scheduling_uuid>/|PATCH|
-|스케줄링 삭제|scheduling/\<uuid:scheduling_uuid>/|DELETE|
+|스케줄링 생성|scheduling|POST|
+|전체 스케줄링 리스트 조회|scheduling|GET|
+|스케줄링 조회|scheduling/\<uuid:scheduling_uuid>|GET|
+|스케줄링 수정|scheduling/\<uuid:scheduling_uuid>|PATCH|
+|스케줄링 삭제|scheduling/\<uuid:scheduling_uuid>|DELETE|
 |워크플로우 별 스케줄링 리스트 조회|scheduling/workflow/\<uuid:workflow_uuid>|GET|
 |스케줄링 활성화|scheduling/\<uuid:scheduling_uuid>/execute|POST|
 |스케줄링 비활성화|scheduling/\<uuid:scheduling_uuid>/deactive|POST|
